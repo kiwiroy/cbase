@@ -1,0 +1,261 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+manx is distributed in a single compressed file manxRL.zip; R and L
+would be the release and level numbers, respectively.  The ZIP data
+compression utilities are needed to extract the individual files.
+
+The following files are obtained by decompressing manxRL.zip:
+
+    manx.rme  preliminary information
+ license.txt  license
+    ansi.h    ANSI compatibility header
+makefile      UNIX makefile
+    manx.c    manx source code
+    manx.frm  sample manual entry form
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/08/22
+----------------------------------------------------------------------
+| manx - manual entry extractor                                      |
+| Version 1.1.2                                                      |
+----------------------------------------------------------------------
+
+======================================================================
+COPYRIGHT
+
+Copyright (c) 1989 Citadel
+All Rights Reserved
+
+Citadel Software, Inc.
+241 East Eleventh Street
+Brookville, IN 47012
+317-647-4720
+BBS 317-647-2403
+
+See the file license.txt for copyright information and disclaimer.
+
+======================================================================
+MANX
+
+The manx utility extracts manual entries from source files.  The files
+are read from stdin and the manual entries are written to stdout.
+Each individual manual entry is broken into pages separated by form
+feeds and terminated with a form feed.  The manx manual entry located
+in manx.c contains a more detailed description.
+
+The manx utility was originally developed for cbase, a complete
+multiuser C database file management library developed by Citadel.  A
+trial copy of cbase may be obtained on the Citadel BBS.
+
+======================================================================
+INSTALLATION INSTRUCTIONS
+
+Since C compilers are currently at various stages of ANSI compliance,
+the user must specify to manx what ANSI features are supported by
+his compiler.  This is done by setting a set of ANSI compatibility
+macros that have been isolated in the file ansi.h.  For instance, the
+macro AC_PROTO should be defined if function prototypes are supported.
+As distributed, ansi.h is set up for a fully ANSI compliant compiler.
+After ansi.h is set up, it should be copied to the include directory.
+Isolating these definitions in a separate header outside of manx
+allows ansi.h to be readily available to other applications.
+
+Exact installation procedures for DOS vary.  The instructions below
+are for Borland Turbo C.
+
+
+
+
+                                                     Citadel  91/08/22
+                                 UNIX
+     1. Compile manx.
+             $ make manx
+     2. Install manx.  This will copy manx to /usr/bin.
+             $ su
+             # make install
+             # ^d
+     3. Extract and print manx manual entry.
+             $ make man
+             $ lp manx.man
+
+
+                                 DOS
+     1. Compile manx.
+             > tcc -O -A -ms manx.c
+     2. Install manx by copying it to a directory in the path.
+             > copy manx.exe c:\usr\bin
+             > del manx.exe
+     3. Extract and print manx manual entry.
+             > type manx.c | manx > manx.man
+             > print manx.man
+
+======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/08/22
+----------------------------------------------------------------------
+| cbase - The C Database Library                                     |
+| Version 1.0.2                                                      |
+----------------------------------------------------------------------
+
+cbase is a complete multiuser C database file management library,
+providing indexed and sequential access on multiple keys.  It features
+a layered architecture and comprises four individual libraries.
+
+                 -----------------------------------
+                 |              ISAM*              |
+                 -----------------------------------
+                 |         File Structure          |
+                 -----------------------------------
+                 |          Buffered I/O           |
+                 -----------------------------------
+                 |           file system           |
+                 -----------------------------------
+                         cbase Architecture
+
+                 -----------------------------------
+                 |              cbase              |
+                 -----------------------------------
+                 |     lseq       |      btree     |
+                 -----------------------------------
+                 |              blkio              |
+                 -----------------------------------
+                 |        operating system         |
+                 -----------------------------------
+                           cbase Libraries
+
+The four libraries are:
+
+     cbase - C database library for indexed and sequential access
+     lseq  - doubly linked sequential file management library
+     btree - B+-tree file management library
+     blkio - block buffered input/output library
+
+cbase internally uses lseq for record storage and btree for inverted
+file index storage, which in turn use blkio for file access and
+buffering.  blkio is analagous to stdio but based on a file model more
+appropriate for structured files such as used in database software.
+
+The lower level libraries can also be accessed directly for use
+independent of cbase.  For example, the btree library can be used to
+manipulate B+-trees for purposes other than inverted files, and the
+blkio library to develop new structured file management libraries.
+
+
+* ISAM stands for Indexed Sequential Access Method.
+
+                                                     Citadel  91/08/22
+                            cbase Features
+                            --------------
+Portable:
+  - Written in strict adherence to ANSI C standard.
+  - K&R C compatibility maintained.
+  - All operating system dependent code is isolated to a small portion
+    of the blkio library to make porting to new systems easy.
+  - UNIX and DOS currently supported.
+Buffered:
+  - Both records and indexes are buffered using LRU (least recently
+    used) buffering.
+Fast and efficient random access:
+  - B+-trees are used for inverted file key storage.
+  - Multiple keys are supported.
+  - Both unique and duplicate keys are supported.
+Fast and efficient sequential access:
+  - B+-trees also allow keyed sequential access.
+  - Records are stored in doubly linked lists for non-keyed sequential
+    access.
+  - Both types of sequential access are bidirectional.
+Multiuser:
+  - Read-only locking.
+Other Features:
+  - Text file data import and export.
+  - Custom data types can be defined.
+  - Marker used to detect corrupt files.
+  - Reference documentation is in standard UNIX manual entry format,
+    including errno values.
+Utilities:
+  - cbddlp, a data definition language processor, is provided to
+    automatically generate the C code defining a database.
+
+
+$77 plus shipping                                      VISA/MasterCard
+
+All source code included.
+No run-time fees or royalties.
+
+Citadel Software, Inc.
+241 East Eleventh Street
+Brookville, IN 47012
+317-647-4720
+BBS 317-647-2403
+
+An evaluation copy of cbase can be obtained at no charge on the
+Citadel BBS, or send $5 for diskette.
+
+
+
+
+
+                                                     Citadel  91/08/22
+

@@ -1,0 +1,75 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+                     manx GENERAL PUBLIC LICENSE
+
+Copyright (c) 1989 Citadel.
+
+The license agreements of most software companies keep you at the
+mercy of those companies.  By contrast, this general public license is
+intended to give everyone the right to share manx.  To make sure that
+you get the rights we want you to have, we need to make restrictions
+that forbid anyone to deny you these rights or to ask you to surrender
+the rights.  Hence this license agreement.
+
+Specifically, we want to make sure that you have the right to give
+away copies of manx, that you receive source code, and that you know
+you can do these things.
+
+To make sure that everyone has such rights, we have to forbid you to
+deprive anyone else of these rights.  For example, if you distribute
+copies of manx, you must give the recipients all the rights that you
+have.  You must make sure that they, too, receive the source code.
+And you must tell them their rights.  Also, for our own protection, we
+must make certain that everyone finds out that there is no warranty
+for manx.
+
+Therefore Citadel makes the following terms which say what you must do
+to be allowed to distribute manx.
+
+
+                           COPYING POLICIES
+
+1. You may copy and distribute verbatim copies of manx as you receive
+   it, in any medium, provided that no files (including this License
+   Agreement) are omitted or modified.
+
+2. You may not copy, sublicense, distribute or transfer manx except
+   as expressly provided under this License Agreement.  Any attempt
+   otherwise to copy, sublicense, distribute or transfer manx is void
+   and your rights to use manx under this License Agreement shall be
+   automatically terminated.
+
+Your comments and suggestions about our licensing policies and our
+software are welcome.  Please contact Citadel, 241 East Eleventh
+Street, Brookville, IN 47012.
+
+
+                              DISCLAIMER
+
+BECAUSE MANX IS LICENSED FREE OF CHARGE, WE PROVIDE ABSOLUTELY NO
+WARRANTY, TO THE EXTENT PERMITTED BY APPLICABLE STATE LAW.  EXCEPT
+WHEN OTHERWISE STATED IN WRITING, CITADEL AND/OR OTHER PARTIES PROVIDE
+MANX "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR
+IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK
+AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD
+THE MANX PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW WILL CITADEL AND/OR ANY
+OTHER PARTY WHO MAY MODIFY AND REDISTRIBUTE MANX AS PERMITTED ABOVE,
+BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY LOST PROFITS, LOST MONIES,
+OR OTHER SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF
+THE USE OR INABILITY TO USE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA
+OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY THIRD PARTIES
+OR A FAILURE OF THE PROGRAM TO OPERATE WITH PROGRAMS NOT DISTRIBUTED
+BY CITADEL) THE PROGRAM, EVEN IF YOU HAVE BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES, OR FOR ANY CLAIM BY ANY OTHER PARTY.
+
+
+                                                     Citadel  91/08/22
+

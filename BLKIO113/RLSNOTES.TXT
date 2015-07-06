@@ -1,0 +1,157 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+In this file are summarized the additions and modifications made to
+blkio this release.  Users upgrading from a previous release should
+read it carefully.
+
+
+                      blkio 1.1.3 Release Notes
+                      -------------------------
+o ANSI compatibility macros moved to dedicated header file <ansi.h>.
+
+o Function prototype form used for function definitions if AC_PROTO
+  defined.
+
+o Additional ANSI compatibility macros added.
+
+o bcloseall function added.
+
+o SINGLE_USER macro added.
+
+o nelems macro added.
+
+o "fd" suffix removed from member names in fd_t union.
+
+o Reference to l_sysid member of flock structure removed from lockb.c
+  because not defined in BSD UNIX.
+
+o Operating system macros changed to the form OS_*, and HOST changed
+  to OPSYS.  Also, C compiler macros changed to the form CC_*, and
+  MSDOSC changed to CCOM.  These macros are only used internally, and
+  the changes are only of interest to users who have ported blkio to
+  a new operating system or compiler.
+
+o DOS file locking added to lockb.
+
+o DOS library names changed to more customary form where memory model
+  is first character rather than last.
+
+
+                      blkio 1.1.2 Release Notes
+                      -------------------------
+o __STDC__ macro no longer used to detect ansi compatibility.
+
+o AC_HDRS macro added to indicate availability of all ANSI headers
+  (e.g., <stddef.h> and <stdlib.h>).
+
+
+                                                     Citadel  91/09/23
+o AC_LDOUBLE macro changed to function as flag indicating long double
+  data type support.
+
+o AC_PROTO macro added to indicate function prototype support.
+
+o lockb bug fixed.
+
+o Memory model parameter added to install.bat.  Library file name
+  changed to signify model (e.g., blkioh.lib for huge).
+
+o Parameter added to install.bat to make extraction of reference
+  manual optional.
+
+
+                      blkio 1.1.1 Release Notes
+                      -------------------------
+o NIL macro added in blkio.h.
+
+o #define void char added in blkio.h if __STDC__ != 1.  This is for
+  older compilers which do not recognize the void type.
+
+o strlen declaration if __STDC__ != 1 removed.
+
+
+o The macros FILENAME_MAX, FOPEN_MAX, and offsetof are checked to be
+  defined even if __STDC__ == 1.
+
+o -A compiler option used in Turbo C installation bat file to set
+  __STDC__ to 1.
+
+o MSDOS macro in blkio_.h changed to MS_DOS to prevent QuickC
+  warnings.
+
+o For UNIX, errno values EFBIG and ENOSPC used when appropriate rather
+  than BEPANIC.
+
+
+                       blkio 1.1 Release Notes
+                       -----------------------
+o bpos_t typedef changed from size_t to unsigned long.  If using a
+  compiler that defines size_t as unsigned int and sizeof(int) !=
+  sizeof(long), this allows larger files to be accessed, but will
+  cause problems with existing files created with blkio 1.0.  Existing
+  files will require conversion if sizeof(int) != sizeof(long) for the
+  compiler being used.  If the limitation on the number of records is
+  unimportant, the bpos_t typedef (in blkio.h) can be changed back to
+  size_t so that no file conversion will be necessary.
+
+o bopen has been modified to open block files which do not end on a
+  block boundary.  This was done to allow blkio to be used to rebuild
+  corrupt files.
+                                                     Citadel  91/09/23
+
+o bsetvbuf bug for connecting user-supplied buffer fixed.
+
+o function prototypes used if __STDC__ == 1
+
+o const used if __STDC__ == 1
+
+o bgethf sets errno to EINVAL instead of BEBOUND if the field extends
+  beyond the end of the header.
+
+o bgetbf sets errno to EINVAL instead of BEBOUND if the field extends
+  beyond the end of the block.
+
+o lockb len parameter type changed from size_t to bpos_t.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+

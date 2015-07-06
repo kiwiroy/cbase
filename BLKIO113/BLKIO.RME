@@ -1,0 +1,313 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+blkio is distributed in a single compressed file blkioRL.zip; R and L
+would be the release and level numbers, respectively.  The ZIP data
+compression utilities are needed to extract the individual files.
+
+The following files are obtained by decompressing blkioRL.zip:
+
+   blkio.rme  preliminary information
+ license.txt  license
+rlsnotes.txt  release notes
+    ansi.h    ANSI compatibility header
+makefile      UNIX makefile
+ install.bat  DOS installation batch file
+   blkio.rsp  Response file for building Borland C library.
+       *.h    blkio header source files
+       *.c    blkio C source files
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+----------------------------------------------------------------------
+| blkio - block buffered i/o library                                 |
+| Version 1.1.3                                                      |
+----------------------------------------------------------------------
+
+======================================================================
+COPYRIGHT
+
+Copyright (c) 1989 Citadel
+All Rights Reserved
+
+Citadel Software, Inc.
+241 East Eleventh Street
+Brookville, IN 47012
+317-647-4720
+BBS 317-647-2403
+
+See the file license.txt for copyright information and disclaimer.
+
+======================================================================
+BLKIO
+
+The blkio library is a buffered input/output library for C similar to
+the stdio library but designed for use with structured files.  The LRU
+(least recently used) replacement algorithm is used for buffering.
+The reference manual is embedded in the source code (see INSTALLATION
+INSTRUCTIONS, below).  For additional information on using the
+library, see the article "A Buffered I/O Library for Structured Files"
+in the October 1989 issue of "The C Users Journal."
+
+The blkio library is a component of cbase, a complete multiuser C
+database file management library developed by Citadel.  A trial copy
+of cbase may be obtained on the Citadel BBS.
+
+======================================================================
+INSTALLATION INSTRUCTIONS
+
+Before installing blkio, the manx utility should be compiled and
+placed in a directory in the path.  manx is used to extract the
+reference manual.  If manx was not received with blkio, it can be
+downloaded from the Citadel BBS.
+
+Since C compilers are currently at various stages of ANSI compliance,
+the user must specify to blkio what ANSI features are supported by
+his compiler.  This is done by setting a set of ANSI compatibility
+macros that have been isolated in the file ansi.h.  For instance, the
+macro AC_PROTO should be defined if function prototypes are supported.
+As distributed, ansi.h is set up for a fully ANSI compliant compiler.
+After ansi.h is set up, it should be copied to the include directory.
+Isolating these definitions in a separate header outside of blkio
+
+                                                     Citadel  91/09/23
+allows ansi.h to be readily available to applications and other
+libraries not using blkio.
+
+To select the operating system, set the OPSYS macro in the private
+header file blkio_.h.  The modifications necessary to port blkio to a
+new operating system should not prove difficult, consisting mostly of
+direct translations of system calls such as open, close, and lseek.
+All operating system dependent code is located in the files buops.c
+and lockb.c.
+
+To select the C compiler, set the CCOM macro in blkio_.h.  The
+modifications necessary to port to a new C compiler should be minimal
+(<ansi.h> will take care of most compiler differences), consisting
+only of translations of header file names and macro names such as
+those used by open and lseek.
+
+If only single-user applications are to be developed, the SINGLE_USER
+macro in blkio_.h can be defined to disable the file locking system
+calls.  This is primarily intended to allow DOS applications to run
+without requiring share to be loaded.  Note that it is still necessary
+to use the cbase locking functions in order to set flags checked
+internally by cbase.
+
+Because of the lack of uniformity among DOS C compilers, exact
+installation procedures for this system vary widely.  The supplied
+batch file install.bat is written for Borland Turbo C.  install.bat
+takes two arguments.  The first specifies the memory model, legal
+values for which are s, m, c, l, and h; the library file is named
+blkiom.lib, where m would correspond to the memory model of the
+library.  The second, if present, causes the reference manual to be
+extracted from the source code into the file blkio.man.  See the
+comments at the head of install.bat for notes on editing it for
+other C compilers and differences in your system configuration.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+                                 UNIX
+     1. Set the OPSYS macro in blkio_.h to OS_UNIX.
+     2. Set the CCOM macro in blkio_.h to the C compiler being used.
+     3. Include or exclude the SINGLE_USER macro in blkio_.h as
+        desired.
+     4. Install the boolean header file.
+             $ su
+             # cp bool.h /usr/include
+             # ^d
+     5. Extract the reference manual.
+             $ make man
+     6. Build the blkio library.
+             $ make blkio
+     7. Install the blkio library.  This will copy the blkio header
+        file blkio.h to /usr/include and the blkio library archive
+        to /usr/lib.
+             $ su
+             # make install
+             # ^d
+
+
+                                 DOS
+     1. Set the OPSYS macro in blkio_.h to OS_DOS.
+     2. Set the CCOM macro in blkio_.h to the C compiler being used.
+     3. Include or exclude the SINGLE_USER macro in blkio_.h as
+        desired.
+     4. If necessary, modify install.bat for the C compiler being
+        used.
+     5. Extract the reference manual, then build and install the blkio
+        library.
+             > install h x
+        Install may be rerun (without the x argument) for each desired
+        memory model.
+
+======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+----------------------------------------------------------------------
+| cbase - The C Database Library                                     |
+| Version 1.0.2                                                      |
+----------------------------------------------------------------------
+
+cbase is a complete multiuser C database file management library,
+providing indexed and sequential access on multiple keys.  It features
+a layered architecture and comprises four individual libraries.
+
+                 -----------------------------------
+                 |              ISAM*              |
+                 -----------------------------------
+                 |         File Structure          |
+                 -----------------------------------
+                 |          Buffered I/O           |
+                 -----------------------------------
+                 |           file system           |
+                 -----------------------------------
+                         cbase Architecture
+
+                 -----------------------------------
+                 |              cbase              |
+                 -----------------------------------
+                 |     lseq       |      btree     |
+                 -----------------------------------
+                 |              blkio              |
+                 -----------------------------------
+                 |        operating system         |
+                 -----------------------------------
+                           cbase Libraries
+
+The four libraries are:
+
+     cbase - C database library for indexed and sequential access
+     lseq  - doubly linked sequential file management library
+     btree - B+-tree file management library
+     blkio - block buffered input/output library
+
+cbase internally uses lseq for record storage and btree for inverted
+file index storage, which in turn use blkio for file access and
+buffering.  blkio is analagous to stdio but based on a file model more
+appropriate for structured files such as used in database software.
+
+The lower level libraries can also be accessed directly for use
+independent of cbase.  For example, the btree library can be used to
+manipulate B+-trees for purposes other than inverted files, and the
+blkio library to develop new structured file management libraries.
+
+
+* ISAM stands for Indexed Sequential Access Method.
+
+                                                     Citadel  91/09/23
+                            cbase Features
+                            --------------
+Portable:
+  - Written in strict adherence to ANSI C standard.
+  - K&R C compatibility maintained.
+  - All operating system dependent code is isolated to a small portion
+    of the blkio library to make porting to new systems easy.
+  - UNIX and DOS currently supported.
+Buffered:
+  - Both records and indexes are buffered using LRU (least recently
+    used) buffering.
+Fast and efficient random access:
+  - B+-trees are used for inverted file key storage.
+  - Multiple keys are supported.
+  - Both unique and duplicate keys are supported.
+Fast and efficient sequential access:
+  - B+-trees also allow keyed sequential access.
+  - Records are stored in doubly linked lists for non-keyed sequential
+    access.
+  - Both types of sequential access are bidirectional.
+Multiuser:
+  - Read-only locking.
+Other Features:
+  - Text file data import and export.
+  - Custom data types can be defined.
+  - Marker used to detect corrupt files.
+  - Reference documentation is in standard UNIX manual entry format,
+    including errno values.
+Utilities:
+  - cbddlp, a data definition language processor, is provided to
+    automatically generate the C code defining a database.
+
+
+$77 plus shipping                                      VISA/MasterCard
+
+All source code included.
+No run-time fees or royalties.
+
+Citadel Software, Inc.
+241 East Eleventh Street
+Brookville, IN 47012
+317-647-4720
+BBS 317-647-2403
+
+An evaluation copy of cbase can be obtained at no charge on the
+Citadel BBS, or send $5 for diskette.
+
+
+
+
+
+                                                     Citadel  91/09/23
+

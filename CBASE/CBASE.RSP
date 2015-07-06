@@ -1,0 +1,10 @@
++cbclose.obj  +cbcreate.obj +cbdelcur.obj +cbexport.obj &
++cbgetkcu.obj +cbgetlck.obj +cbgetr.obj   +cbgetrcu.obj &
++cbgetrf.obj  +cbimport.obj +cbinsert.obj +cbkeyali.obj &
++cbkeyfir.obj +cbkeylas.obj +cbkeynex.obj +cbkeypre.obj &
++cbkeysrc.obj +cblock.obj   +cbmkndx.obj  +cbopen.obj   &
++cbputr.obj   +cbrecali.obj +cbrecfir.obj +cbreclas.obj &
++cbrecnex.obj +cbrecpre.obj +cbrmndx.obj  +cbsetkcu.obj &
++cbsetrcu.obj +cbsync.obj   &
++cbcmp.obj    +cbexp.obj    +cbimp.obj    +cbops.obj
+

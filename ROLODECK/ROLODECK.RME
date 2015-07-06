@@ -1,0 +1,105 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+The following files are obtained by decompressing rolodeck.zip:
+
+rolodeck.rme  preliminary information
+rlsnotes.txt  release notes
+makefile      UNIX makefile
+ install.bat  DOS installation batch file
+rolodeck.c    rolodeck source code
+rolodeck.ddl  rolodeck data definition source
+rolodeck.h    rolodeck data definition header
+rolodeck.i    rolodeck data definition includer
+  basstr.h    BASIC string function header
+   cvtss.c    string conversion function
+  fdcset.c    DOS function to set file descriptor count
+     fml.c    name format conversion functions
+    ansi.c    ANSI routines required by cbase
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+----------------------------------------------------------------------
+| rolodeck - a cbase example program                                 |
+| Version 1.0.2                                                      |
+----------------------------------------------------------------------
+
+======================================================================
+INSTALLATION INSTRUCTIONS
+
+ansi.c may require editing to compile.  It is recommended that any
+functions provided by the system be removed from this file.  If the
+compiler is fully ANSI, simply remove ansi.c from the makefile.
+
+The supplied DOS batch file install.bat is written for Borland Turbo
+C, and will require some modification for use with other compilers.
+install.bat takes two arguments.  The first specifies the memory
+model, legal values for which are s, m, c, l, and h.  The second, if
+present, causes the reference manual to be extracted from the source
+code into the file rolodeck.man.
+
+                                 UNIX
+     1. Install cbase.
+     2. Compile rolodeck.
+             $ make rolodeck
+     3. Extract and print the reference manual.
+             $ make man
+             $ lp rolodeck.man
+
+                                 DOS
+     1. Install cbase.
+     2. If necessary, modify install.bat for the C compiler
+        being used.
+     3. Compile rolodeck, and extract and print the reference manual.
+             > install l x
+             > print rolodeck.man
+
+======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+

@@ -1,0 +1,53 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+In this file are summarized the additions and modifications made to
+rolodeck this release.  Users upgrading from a previous release should
+read it carefully.
+
+                     rolodeck 1.0.2 Release Notes
+                     ----------------------------
+o <ansi.h> used for ANSI compatibility.
+
+o If AC_PRINTF defined, printf functions use %*.
+
+o rolodeck.ddl added.
+
+o Terminating nul characters for t_string data are no longer stored in
+  the database.  This changes the format of the database, so existing
+  data must be exported and database files deleted before upgrading.
+
+o fmltolfm and lfmtofml modified to not terminate the target string
+  with a nul unless it is shorter than the specified length.
+
+o fdcset function added.
+
+o DOS library names changed to more customary form where memory model
+  is first character rather than last.
+
+
+                     rolodeck 1.0.1 Release Notes
+                     ----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+

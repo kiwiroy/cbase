@@ -1,0 +1,105 @@
+
+                              ORDER FORM
+
+To :                                    From :
+
+Citadel Software, Inc.                  ______________________________
+241 East Eleventh Street                ______________________________
+Brookville, IN 47012                    ______________________________
+317-647-4720                            ______________________________
+BBS 317-647-2403                        Contact :  ___________________
+                                        Phone   :  ___________________
+
+           Description                Unit Price  Quantity    Total
+
+cbase (one programmer)..............    $77.00     ______   $ ________
+
+Additional Programmer License ......     25.00     ______     ________
+
+Additional Copies of Manual.........     12.00     ______     ________
+
+                                                 Sub-total  $ ________
+
+                        Indiana residents add 5% sales tax    ________
+
+                                Shipping (see rates below)    ________
+
+                                                     Total  $ ________
+
+Diskette Format :  __ DOS 5.25" 360K  __ DOS 3.5" 720K
+
+Archive Format  :  __ ZIP  __ ZOO
+
+Payment Method  :  __ Check  __ Bank Draft  __ VISA/MasterCard
+
+Shipping Method :  __ UPS Ground  __ UPS 2nd Day Blue Label Air
+                   __ U.S. Postal Service Air Parcel Post
+
+Card number :  ________________________  Expiration date :  ____/____
+
+Card Holder's Signature :  ___________________________________________
+
+Terms: VISA, MasterCard, check drawn on U.S. Bank in U.S. funds.
+     International bank or postal money order in U.S. funds.
+     Purchase orders (net 30) accepted from larger corporations.
+     All international orders must be prepaid.
+
+Upon receipt of this paid invoice, a bound copy of the manual and the
+current version of the software will be sent, as well as any
+additional manuals ordered.  The number of manuals may not exceed the
+number of programmers licensed.
+
+                                                     Citadel  91/09/23
+
+                            SHIPPING RATES
+
+----------------------------------------------------------------------
+| Shipping Method/Destination  |   First Manual   |Each Addtnl Manual|
+|------------------------------|-------------------------------------|
+| UPS Ground___________________|                  |                  |
+| United States (lower 48)     | $ 4.00           | $ Free           |
+|------------------------------|-------------------------------------|
+| UPS 2nd Day Blue Label Air___|                  |                  |
+| United States (lower 48)     | $ 6.00           | $ 2.00           |
+| Alaska and Hawaii            |   8.00           |   2.50           |
+| Rural Alaska                 |  17.00           |   2.50           |
+| Puerto Rico                  |   9.00           |   2.00           |
+|------------------------------|-------------------------------------|
+| USPS Air Parcel Post_________|                  |                  |
+| United States and Puerto Rico| $ 5.00           | $ 2.50           |
+| Canada                       |   8.00           |   3.00           |
+| International Rate Group A   |  12.00           |   4.00           |
+| International Rate Group B   |  16.00           |   6.00           |
+| International Rate Group C   |  19.00           |   8.00           |
+| International Rate Group D   |  22.00           |  10.00           |
+| International Rate Group E   |  25.00           |  12.00           |
+----------------------------------------------------------------------
+
+           U.S. Postal Service Air Parcel Post Rate Groups
+
+A - Antilles, Aruba, Bahamas, Belize, Bermuda ($340 insurance limit),
+    Cayman Islands, Costa Rica (no insurance), Dominican Republic (no
+    insurance), Jamaica (no insurance), Mexico (no insurance), and
+    Panama (no insurance).
+B - Austria, Barbados ($170 insurance limit), Bolivia (no insurance),
+    Colombia (no insurance), Liechtenstein, Luxembourg, and
+    Switzerland.
+C - Denmark, Ecuador (no insurance), Gibraltar, Greece (no insurance),
+    Hong Kong, Iceland, Ireland ($1000 insurance limit), Israel (no
+    insurance), Italy, Kuwait, Malta (no insurance), Netherlands,
+    Portugal, Qatar, Spain ($340 insurance limit), United Kingdom, and
+    West Germany.
+D - Argentina, Australia, Belgium, Chile (no insurance), Egypt,
+    Finland, Kenya ($370 insurance limit), New Caledonia, New Zealand,
+    Norway, Oman ($100 insurance limit), Pakistan ($430 insurance
+    limit), Papua New Guinea, Paraguay (no insurance), Philippines
+    ($210 insurance limit), Polynesia, Saudi Arabia (no insurance),
+    Somalia, and Sweden.
+E - Brazil (no insurance), France, and Japan.
+
+
+
+
+
+                                                     Citadel  91/09/23
+

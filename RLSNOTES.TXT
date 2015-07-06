@@ -1,0 +1,157 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+In this file are summarized the additions and modifications made to
+cbase this release.  Users upgrading from a previous release should
+read it carefully.
+
+                      cbase 1.0.2 Release Notes
+                      -------------------------
+o <ansi.h> used for ANSI compatibility
+
+o Function prototype form used for function definitions if AC_PROTO
+  defined.
+
+o Import functions modified to accept blank fields for numeric types.
+  Blank numeric fields are now interpreted as 0.
+
+o consts removed from cbimp.
+
+o cbexp fixed to not print extra trailing field delimiter.
+
+o Bug importing escape sequence \nnn for t_char and t_uchar fixed.
+
+o Bug detecting eof in cbimport fixed.
+
+o Bug detecting corrupt database on open fixed.
+
+o cbmkndx and cbrmndx functions added.
+
+o nelems macro added.
+
+o SINGLE_USER macro added.
+
+o DOS file locking added.
+
+o DOS library names changed to more customary form where memory model
+  is first character rather than last.
+
+o Batch files for Borland C++ and Microsoft C added.
+
+
+                      cbase 1.0.1 Release Notes
+                      -------------------------
+o AC_* macros (see blkio release notes) used in place of __STDC__ to
+  detect ANSI compatibility.
+
+o t_cistring (case-insensitive string) data type added.
+
+                                                     Citadel  91/09/23
+o cbimport has been modified to continue importing records following
+  the encounter of a record with an illegal duplicate key.
+o cblock fixed to unlock data and key files in reverse order.
+
+o Locking bug fixed in btree and blkio.
+
+
+                       cbase 1.0 Release Notes
+                       -----------------------
+o The parameter list of the cbcreate and cbopen functions have been
+  modified.  The original functions were
+
+     int cbcreate(char *cbname, size_t recsize,
+                              cbfield_t fields[], size_t fldcnt);
+     int cbopen(char *cbname, char *type,
+                              cbfield_t fields[], size_t fldcnt);
+
+  The new functions are
+
+     int cbcreate(char *cbname, size_t recsize,
+                              int fldc, cbfield_t fldv[]);
+     int cbopen(char *cbname, char *type,
+                              int fldc, cbfield_t fldv[]);
+
+o The cbfield_t bit flags CBFKEY and CBFUNIQ have been changed to
+  CB_FKEY and CB_FUNIQ.
+
+
+
+o All key cursors are positioned to null when a record is deleted.
+
+o Field numbering now begins at zero.
+
+o Because of an enhancement made to the btree library, it is no longer
+  necessary to include the record position in the data type comparison
+  functions when defining new data types.
+
+o The functions cbimport and cbexport have been added to import and
+  export data to printable files.  When adding a new data type,
+  an import function and an export function must be provided in
+  addition to the comparison function.
+
+o There is no longer a maximum number of cbase fields.  The fldv array
+  is now dynamically allocated when a cbase is opened.
+
+o cbclose bug fixed.  Would not close first key file.
+
+o function prototypes used if __STDC__ == 1.
+
+o const used if __STDC__ == 1.
+
+                                                     Citadel  91/09/23
+o long double data types (t_ldouble, t_ldoublev) enabled if __STDC__
+  == 1.
+
+o cblock sets the cursors to null when unlocking.
+
+
+
+o A pair of functions for converting names between the formats
+  last-name-first and first-name-first has been provided.  fmltolfm
+  and lfmtofml are located in the file fml.c in the example program
+  directory.
+
+o -A compiler option used in Turbo C installation batch file to set
+  __STDC__ to 1.
+
+o In the blkio library, bpos_t has been changed from size_t to
+   unsigned long.  See the blkio library release notes for explanation
+   of the effects of this change.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+

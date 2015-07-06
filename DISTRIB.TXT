@@ -1,0 +1,53 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+                    CBASE DISTRIBUTION APPLICATION
+
+In order to distribute cbase for profit, prior written permission must
+be obtained from Citadel.  The following additional restrictions apply
+to distribution for profit.
+
+     - cbase may not be included on a diskette with any other
+       software.
+
+     - The distribution fee is limited to $10.00.  No additional
+       remuneration may be accepted.
+
+     - The distributor must make fully evident the fact that cbase
+       is not in the public domain, and that the fee paid to the
+       distributor does not apply toward the purchase of cbase.
+
+Along with this application form, a copy of the distributor's
+promotional material and advertising copy should be included.
+
+----------------------------------------------------------------------
+|                        Mailing Information                         |
+|                                                                    |
+|                                               Date :  ____________ |
+|                                                                    |
+|    Name :  __________________________________________              |
+|                                                                    |
+|   Title :  __________________________________________              |
+|                                                                    |
+| Company :  __________________________________________              |
+|                                                                    |
+| Address :  __________________________________________              |
+|                                                                    |
+|    City :  _____________________, _____  ____________              |
+|                                   State    Zip Code                |
+|   Phone :  _____________________                                   |
+|                                                                    |
+|  Copying Fee Per Diskette :  __________                            |
+----------------------------------------------------------------------
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+

@@ -1,0 +1,2252 @@
+                                 cbaseTM
+
+                        The C Database Library
+
+
+
+
+
+                                Citadel
+                          Brookville, IndianaCopyright (c) 1989, 1991 Citadel
+All rights reserved
+
+Citadel Software, Inc.
+241 East Eleventh Street
+Brookville, IN 47012
+317-647-4720
+BBS 317-647-2403
+
+Version 1.0.2
+
+This manual is protected by United States copyright law.  No part of it
+may be reproduced without the express written permission of Citadel.
+
+Technical Support
+The Citadel BBS is available 24 hours a day.  Voice support is available
+between 10 a.m. and 4 p.m. EST.  When calling for technical support,
+please have ready the following information:
+
+	- product name and version number
+	- operating system and version number
+	- C compiler and version number
+	- computer brand and model
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+UNIX is a trademark of AT&T.  Turbo C is a trademark of Borland
+International, Inc.
+
+
+
+
+                                                               Contents
+
+
+Introduction                                                          1
+
+Chapter 1.  A Tutorial Introduction                                   3
+	1.1	Defining a Database
+	1.2	Using the cbase Library
+
+Chapter 2.  cbase Architecture                                        9
+
+Chapter 3.  The Data Definition Language                             11
+
+Chapter 4.  cbase Library Functions                                  13
+	4.1	Access Control Functions
+	4.2	Lock Functions
+	4.3	Record Cursor Position Functions
+	4.4	Key Cursor Position Functions
+	4.5	Input/Output Functions
+	4.6	Import/Export Functions
+
+Chapter 5.  Custom Indexing                                          23
+
+Chapter 6.  An Example Program                                       27
+	6.1	Data Definition
+	6.2	Opening a cbase
+	6.3	Locking a cbase
+	6.4	Accessing a cbase
+	6.5	Closing a cbase
+	6.6	Storing Variable Length Text
+
+Appendix A.  Installation Instructions                               37
+	A1	manx
+	A2	The blkio Library
+	A3	The lseq Library
+	A4	The btree Library
+	A5	The cbase Library
+	A6	Combining Libraries
+	A7	cbddlp
+	A8	rolodeck
+	A9	Troubleshooting
+
+Appendix B.  Defining New Data Types                                 45
+	B1	The Type Name
+	B2	The Comparison Function
+	B3	The Export and Import Functions
+	B4	The Type Count
+
+Appendix C.  Porting to a New Operating System                      49
+	C1	The OPSYS and CCOM Macros
+	C2	The File Descriptor Type
+	C3	System Calls for File Access
+	C4	System Calls for File Locking 
+	C5	Debugging
+
+References                                                           53
+
+
+
+
+                                                           Introduction
+
+
+     cbase is a complete multiuser C database file management library,
+providing indexed and sequential access on multiple keys.  Custom
+indexing beyond that performed automatically by cbase can also be
+performed.  cbase features a layered architecture (see Figure 2.1), and
+actually includes four individual libraries.  Below is a summary of the
+library's main features.
+
+
+                            cbase Features
+
+Portable
+  - Written in strict adherence to ANSI C standard.
+  - K&R C compatibility maintained.
+  - All operating system dependent code is isolated, making it easy to
+    port to new systems easy.
+  - UNIX and DOS currently supported.
+  - Complete C source code included.
+Buffered
+  - Both records and indexes are buffered using LRU (least recently
+    used) buffering.
+Fast and efficient random access
+  - B+-trees are used for inverted file key storage.
+  - Multiple keys are supported.
+  - Both unique and duplicate keys are supported.
+Fast and efficient sequential access
+  - B+-trees also allow keyed sequential access.
+  - Records are stored in doubly linked lists for non-keyed sequential
+    access.
+  - Both types of sequential access are bidirectional.
+Multiuser
+  - Read-only locking.
+Other Features
+  - Text file data import and export.
+  - Custom data types can be defined.
+  - Marker used to detect corrupt files.
+  - Reference documentation is in standard UNIX manual entry format,
+    including errno values.
+Utilities
+  - cbddlp, a data definition language processor, is provided to
+    automatically generate the C code defining a database.
+
+
+
+
+                                    Chapter 1:  A Tutorial Introduction
+
+
+     We begin with a brief example of a cbase application to provide the
+reader with a general understanding of the basic elements involved. 
+Details on everything presented here will come in later chapters.  The
+running example in this tutorial will be a minimal inventory database
+consisting of a single type of record having fields for a unique part
+code, a part description, bin location, and quantity in stock.
+
+
+1.1  Defining a Database
+
+     The first step in any database application is to design the logical
+structure of the database, i.e., the records to be stored and the fields
+in those records.  This logical design must then be encoded somehow into
+the application, which involves the construction of data structures that
+can be quite lengthy and tedious to input.  To facilitate this process,
+cbase allows databases to be defined using a relatively concise data
+definition language (DDL).
+
+     The most important DDL element is the record statement.  record is
+similar to the C struct statement, but database data types are used
+rather than C types, and fields can be made keys simply by prefixing the
+keyword key.  Using the keyword unique in addition will cause the key to
+be constrained to be unique.  What being a key means is that an index is
+automatically maintained for that field, allowing quick searches to be
+performed on that field as well as rapid sequential processing of the
+records in the sort order of that field.  The DDL statements data file
+and index file are used to specify the filename for each data file and
+index file.  C preprocessor statements can also be included in a DDL
+file.
+
+     Figure 1.1 shows the complete DDL description part.ddl for our
+inventory database.  This information must now be translated into a form
+accessible from a C program.  This is done with the cbase DDL processor
+cbddlp.
+
+    cbddlp part.ddl
+
+From the information in part.ddl, cbddlp generates all the necessary
+macros and data structures necessary to completely define the database
+in C.  Two C source files are generated:  a .h file to be included in
+every module, and a .i file to be included in only one, normally the one
+containing main.  The contents of the .i file will be used only
+internally by cbase, but the contents of the .h file are required by the
+application program.
+
+     Figure 1.2 lists the header file part.h generated from part.ddl. 
+First notice that the C preprocessor statements have been passed through
+unaltered.  There is then a macro identifying the cbase that is the
+record name converted to upper case.  For each record statement in the
+DDL file, there is a corresponding C struct statement using the same
+record name as its identifier.  For each field in a record there is an
+upper case macro identifying it, and a macro for the number of fields in
+the record.  Finally, there is a declaration for the field list data
+structure in the .i file that is passed to the cbase library functions
+to create and open a cbase.  The prefix for the field count and field
+list identifiers are taken from the characters of the first field name
+preceding the first underscore.
+
+
+/* constants */
+#define PTCODE_MAX  (11)    /* part code length max */
+#define PTDESC_MAX  (30)    /* part description length max */
+#define PTBIN_MAX   (4)     /* part bin length max */
+
+/* file assignments */
+data  file "part.dat"   contains part;
+index file "ptcode.ndx" contains pt_code;
+index file "ptdesc.ndx" contains pt_desc;
+
+/* record definitions */
+record part {                                   /* part record */
+    unique key t_string pt_code[PTCODE_MAX];    /* code */
+    key t_string        pt_desc[PTDESC_MAX];    /* description */
+    t_string            pt_bin[PTBIN_MAX];      /* storage location */
+    t_long              pt_stock;               /* quantity in stock */
+};
+
+              Figure 1.1. Definition of the Part Database
+
+
+#ifndef H_PART
+#define H_PART
+
+/* libray headers */
+#include <cbase.h>
+
+#define PTCODE_MAX  (11)    /* part code length max */
+#define PTDESC_MAX  (30)    /* part description length max */
+#define PTBIN_MAX   (4)     /* part bin length max */
+
+/* record name */
+#define PART    "part.dat"
+
+/* part record definition */
+typedef struct part {
+    char pt_code[PTCODE_MAX];
+    char pt_desc[PTDESC_MAX];
+    char pt_bin[PTBIN_MAX];
+    long pt_stock;
+} part_t;
+
+/* field names for record part */
+#define PT_CODE     (0)
+#define PT_DESC     (1)
+#define PT_BIN      (2)
+#define PT_STOCK    (3)
+#define PTFLDC      (4)
+
+/* field definition list for record part */
+extern cbfield_t ptfldv[PTFLDC];
+
+#endif
+
+                 Figure 1.2. Part Database Header File
+
+
+
+1.2  Using the cbase Library
+
+     Figure 1.3 lists a skeletal part database application.  Points to
+notice are the inclusion of the database definition headers, registering
+the bcloseall function, and the use of the macros and data structures
+generated by cbddlp to create and open the database.
+
+/* ansi headers */
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/* library headers */
+#include <cbase.h>
+
+/* local headers */
+#include "part.h"
+#include "part.i"
+
+int main(int argc, char *argv[])
+{
+    cbase_t *   cbp     = NULL;
+    int         found   = 0;
+    struct part pt;
+
+    /* register termination function to flush database buffers */
+    if (atexit(bcloseall)) {
+        perror("atexit");
+        exit(EXIT_FAILURE);
+    }
+
+    /* create cbase */
+    if (cbcreate(PART, sizeof(struct part), PTFLDC, ptfldv) == -1) {
+        if (errno != EEXIST) {
+            fprintf(stderr, "cbcreate:  error %d.\n", errno);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /* open cbase */
+    cbp = cbopen(PART, "r+", PTFLDC, ptfldv);
+    if (cbp == NULL) {
+        fprintf(stderr, "cbopen:  error %d.\n", errno);
+        exit(EXIT_FAILURE);
+    }
+
+    /*
+     *
+     */
+
+    /* close cbase */
+    if (cbclose(cbp) == -1) {
+        fprintf(stderr, "cbclose:  error %d.\n", errno);
+        exit(EXIT_FAILURE);
+    }
+
+    exit(EXIT_SUCCESS);
+}
+
+            Figure 1.3.  Skeletal Part Database Application
+
+This program would be completed by adding the main body of code to
+interact with the user and perform the database operations necessary to
+satisfy his requests.  Below is a quick overview of some of the basic
+database functions and how they are used.
+
+     Most database operations are relative to the record cursor.  The
+record cursor is positioned either on a record or the special position
+null.  Strict attention must be paid to the effect every function used
+has on the record cursor.
+
+     A record is stored in a database with the cbinsert function.  The
+following stores the record pt in the cbase cbp.  Since the part cbase
+has a unique key, the part code, cbinsert will fail and set errno to
+CBEDUP if there is already a record in the cbase with that part code.
+
+    if (cbinsert(cbp, &pt) == -1) {
+        if (errno == CBEDUP) {
+            fprintf(stderr, "Part code %.*s already used.\n",
+                                       sizeof(pt.pt_code), pt.pt_code);
+        } else {
+            fprintf(stderr, "cbinsert:  error %d.\n", errno);
+        }
+    }
+
+The record cursor is placed on the newly inserted record.  Note that the
+error message takes into account that this database does not store the
+terminating nul character of the part code string.
+
+     Records can be directly located based on any of its keys using the
+cbkeysrch function.  cbkeysrch returns a value of zero if there is no
+record with that key value, and positions the record cursor on the record
+with the next higher key.  If a match is found, the record cursor is
+positioned on the match and a value of one returned.
+
+    found = cbkeysrch(cbp, PT_CODE, pt.pt_code);
+    if (found == 0) {
+        fprintf(stderr, "Key not found.\n");
+    }
+
+     A record is deleted by first positioning the record cursor to that
+record, then calling cbdelcur to delete the current record.
+
+     cbdelcur(cbp);
+
+     The need often arises to process a sorted sequence of records.  This
+is done by first positioning the cursor to the first record to be
+processed, then using cbkeynext in a loop to step through each record in
+the order defined by the specified key.  The macro cbkcursor can be used
+to test when the last record has been processed.  The following code
+fragment prints all part codes above a given value.
+
+    cbkeysrch(cbp, PT_CODE, pt.pt_code);
+    while (cbkcursor(cbp, PT_CODE) != NULL) {
+        cbgetr(cbp, &pt);
+        printf("%.*s", sizeof(pt.pt_code), pt.pt_code);
+        cbkeynext(cbp, PT_CODE);
+    }
+
+     There has been some simplification on cursors in this tutorial. 
+There is actually one cursor for the record and a separate cursor for
+each key.  The relationship between these cursors will be covered in
+Chapter 4.
+
+
+
+
+                                         Chapter 2:  cbase Architecture
+
+
+     cbase is designed around a four-layered architecture, the layers
+being:  File System, Buffered I/O, File Structure, and ISAM (Figure 1.1). 
+The nethermost layer is the File System, which is part of the operating
+system.  This layer is accessed via system calls, an interface which
+varies from system to system.  On top of the File System layer, the
+Buffered I/O layer performs two primary functions:  to provide a portable
+interface to the file system, and to perform buffering.  The stdio
+library also performs these same two functions, but it models a file as
+an unstructured stream of characters and is intended primarily for text
+files.  The blkio library, on the other hand, is designed for database
+file access and models a file as a collection of blocks made up of fields
+(see FROS89 for a complete description of blkio).
+
+
+                  ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                  ³              ISAM               ³
+                  ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                  ³         File Structure          ³
+                  ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                  ³          Buffered I/O           ³
+                  ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                  ³           File System           ³
+                  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+                     (a). Database Reference Model
+
+                  ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                  ³              cbase              ³
+                  ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                  ³     lseq       ³      btree     ³
+                  ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                  ³              blkio              ³
+                  ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+                  ³          system calls           ³
+                  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+             (b) Relation of Libraries to Reference Model
+
+                    Figure 2.1. cbase Architecture
+
+
+     The File Structure layer is the most complex.  This is where the
+actual file organizations are defined.  Since different file structures
+are suited to different tasks, there is more than a single library at
+this layer; currently implemented are btree, a B+-tree file management
+library, and lseq, a doubly-linked sequential file management library. 
+At the top of the reference model is the ISAM layer.  ISAM stands for
+Indexed Sequential Access Method, and is the interface typically used in
+database applications.  As the name says, this layer provides both direct
+random access to records via indexes, as well as the sequential
+processing of records.  There is only a single library at this library,
+called cbase, short for C Database.  cbase internally uses lseq for
+record storage and btree to automatically maintain indexes for those
+records.  The relation of each index to the data is referred to as an
+"inverted file" (see ULLM82 and Chapter 5).
+
+
+
+
+
+
+                               Chapter 3:  The Data Definition Language
+
+
+     The first step in the development of a database application is to
+define the logical structure of the database.  This requires C data
+structures that, while not necessarily complex, can be lengthy and
+tedious to construct.  cbase therefore provides a utility to
+automatically generate the necessary C code from a relatively short and
+simple description written in a data definition language (DDL).
+
+     The cbase data definition language processor, cbddlp, takes the name
+of a DDL source file as its only argument.  This file must have the
+extension .ddl.
+
+     cbddlp database.ddl
+
+From the contents of this input file, two C source files are generated. 
+The first is a header file to be included by every source file that will
+access the database.  This file has the same base name as the DDL file
+with the extension .h.  The second is also an include file, but it is to
+be included in only one source file (normally the one containing main)
+in each application accessing the database, because it contains actual
+data.  This file has the same base name as the DDL file with the
+extension .i.
+
+     There are three types of statements in a DDL file.  First, any C
+preprocessor statements may appear in a DDL file; they are simply passed
+through to the generated .h file.  This allows macros for field array
+element counts to be defined, or other header files containing such
+definitions to be included.  Second, file assignments are made by the
+following two statements:
+
+     data file  "recname.dat" contains recname;
+     index file "ndxname.ndx" contains ndxname;
+
+These simply specify that the filename in quotes is to be used for the
+following record or index.  The extensions .dat and .ndx are not required
+by cbase.  Lastly is the record statement, which is used to actually
+define the format of the database.
+
+    record recname {
+        [[unique] key] dbtype fldname[\[elemc\]];
+        ...
+    };
+
+The record statement is very similarly to the C struct statement.  dbtype
+is a cbase data type.  A field is specified to be a key simply by using
+the key specifier, and the key will be constrained to be unique by
+further adding the unique specifier.  C-style comments may also be used
+in DDL files.  A complete DDL file will be included in the example of
+Chapter 6.
+
+     For the predefined cbase data types, cbddlp knows the corresponding
+C data type to use in generating the C structures for the database.  If
+a user has defined a new data type, the corresponding C data type must
+be specified explicitly.  This is done by following the user-defined
+cbase data type by a colon and the corresponding C data type.
+
+    [[unique] key] dbtype:ctype fldname[\[elemc\]]
+
+cbddlp can also be modified to automatically recognize user-defined
+types.  See the readme file accompanying the source code for cbddlp for
+instructions.
+
+     First, there is a macro for the cbase name.  This macro is the
+record name converted to upper case.  Second, a C structure is defined
+that exactly corresponds to each record in the DDL file.  The name of
+this structure is the same as the record name; it is also typedefed to
+the record name with _t appended.  Third, a macro is defined for each
+field in the record; these are used to specify the desired field to the
+cbase library functions.  The field macros are the field names converted
+to upper case, so the field names must be unique across all the records
+in use by an application.  Finally, there is a macro for the field count
+and a declaration for the field list.  These are made unique from other
+cbases by using the first characters (up to four) up to an underscore in
+the first field name as a prefix.  For example, for a record having the
+first field rd_name, the field count and field list would be RDFLDC and
+rdfldv.  These are used in creating and opening a cbase.  The actual
+definition of the field list is contained in the generated .i file.
+
+     cbddlp can be easily integrated into make with the following suffix
+rules.
+
+    # suffix rules
+    .SUFFIXES:  .ddl .h .i
+
+    .ddl.h:
+        cbddlp $<
+
+    .ddl.i:
+        cbddlp $<
+
+These are for the standard UNIX make.  The exact statements may vary for
+other versions.
+
+
+
+
+                                    Chapter 4:  cbase Library Functions
+
+
+     The main cbase library functions are presented in this chapter
+grouped by function.  For further details, see the alphabetically ordered
+reference manual entries.  The cbase functions use the ANSI error
+variable errno for error reporting.  To avoid conflict with existing
+error numbers (defined in <errno.h>), negative values are used.  Macros
+for these values are defined in the header file for cbase and also the
+underlying libraries.
+
+
+4.1  Access Control Functions
+
+     The cbcreate function is used to create a new cbase.
+
+    int cbcreate(const char *cbname, size_t recsize,
+                                    int fldc, const cbfield_t fldv[]);
+
+cbname points to a character string which is the name of the cbase.  This
+name is used as the name of the data file containing the records in the
+cbase.  recsize specifies the record size to be used.  fldc is the number
+of fields in the cbase, and fldv is an array of fldc field definition
+structures.  The field count macro and field definition list created by
+cbddlp should be used for fldc and fldv.
+
+     The field list will generated by cbddlp will normally just be passed
+directly to cbcreate without the application becoming involved in its
+contents.  In some instances, however, it is necessary to directly
+manipulate the field list fldv.  For instance, it is sometimes desired
+to dynamically change the name of the index files, and so the internal
+structure of this list will be explained.
+
+     Field definitions must be listed in the order the fields occur in
+the record; the field macros generated by cbddlp are used to index into
+this array, the first field being zero.  The field definition structure
+type cbfield_t is defined in <cbase.h>.
+
+    typedef struct {        /* field definition */
+        size_t  offset;     /* field offset */
+        size_t  size;       /* size of field */
+        int     type;       /* type of field */
+        int     flags;      /* flags */
+        char *  filename;   /* index file name */
+    } cbfield_t;
+
+offset is the location of the field within the record and size is the
+size of the field.  type specifies the field data type, legal values for
+which are shown in Table 4.1; the user can also define new data types
+(see Appendix B).  flags values are constructed by bitwise ORing together
+flags from the following list.
+
+    CB_FKEY         Field is to be a key.
+    CB_FUNIQ        Only for use with CB_FKEY.
+                    Indicates that the key is
+                    constrained to be unique.
+
+If CB_FKEY is set, filename must point to the name of the file containing
+the index.
+
+    t_char      signed character
+    t_charv     signed character array
+    t_uchar     unsigned character
+    t_ucharv    unsigned character array
+    t_short     signed short integer
+    t_shortv    signed short integer array
+    t_ushort    unsigned short integer
+    t_ushortv   unsigned short integer array
+    t_int       signed integer
+    t_intv      signed integer array
+    t_uint      unsigned integer
+    t_uintv     unsigned integer array
+    t_long      signed long integer
+    t_longv     signed long integer array
+    t_ulong     unsigned long integer
+    t_ulongv    unsigned long integer array
+    t_float     floating point
+    t_floatv    floating point array
+    t_double    double precision
+    t_doublev   double precision array
+    t_ldouble   long double
+    t_ldoublev  long double array
+    t_pointer   pointer
+    t_string    character string
+    t_cistring  case-insensitive character string
+    t_binary    block of binary data (e.g., graphics)
+
+                      Table 4.1. cbase Data Types
+
+     If it is necessary for the application to directly manipulate the
+field list, the code to do so should be considered non-portable and
+isolated, since future enhancements to cbase may require that the
+structure of the field list be altered.
+
+     Before an existing cbase can be accessed, it must be opened.  This
+is done with the function
+
+    cbase_t *cbopen(const char *cbname, const char *type,
+                                    int fldc, const cbfield_t fldv[]);
+
+cbname, fldc, and fldv are the same as for cbcreate, and must be given
+the same values as when the cbase was created.  type points to a
+character string specifying the type of access for which the cbase is to
+be opened (as for the stdio function fopen).  Legal values for type are
+
+    "r"         open for reading
+    "r+"        open for update (reading and writing)
+
+cbopen returns a pointer to the open cbase.
+
+     The cbsync function causes any buffered data for a cbase to be
+written out.
+
+    int cbsync(cbase_t *cbp);
+
+The cbase remains open and the buffers retain their contents.
+
+     After processing is completed on an open cbase, it must be closed
+using the function
+
+    int cbclose(cbase_t *cbp);
+
+The cbclose function causes any buffered data for the cbase to be written
+out, unlocks it, closes it, and frees the cbase pointer.
+
+
+4.2  Lock Functions
+
+     Before an open cbase can be accessed, it must be locked in order to
+prevent possible conflicts arising from two processes attempting to
+access the same data simultaneously.  The function used to control the
+lock status of a cbase is
+
+    int cblock(cbase_t *cbp, int ltype);
+
+where cbp is a pointer to an open cbase and ltype is the lock type to be
+placed on the cbase.  The legal values for ltype are
+
+    CB_RDLCK    lock cbase for reading
+    CB_WRLCK    lock cbase for reading and writing
+    CB_RDLKW    lock cbase for reading (wait)
+    CB_WRLKW    lock cbase for reading and writing (wait)
+    CB_UNLCK    unlock cbase
+
+If ltype is CB_RDLCK and the cbase is currently write locked by another
+process, or if ltype is CB_WRLCK and the cbase is currently read or write
+locked by another process, cblock will fail and set errno to EAGAIN.  Any
+number of processes can have a cbase simultaneously read locked.  For the
+wait lock types, cblock will not return until the lock is available.
+
+     The cbgetlck function reports the lock status held by the calling
+process on a cbase.
+
+     int cbgetlck(cbase_t *cbp);
+
+It returns one of the legal values for the ltype argument in the cblock
+function.
+
+
+4.3  Record Cursor Position Functions
+
+     Each open cbase has a record cursor.  At any given time the record
+cursor is positioned either on a record in that cbase or on a special
+position called null.  The record on which the cursor is located is
+referred to as the current record.  The operations performed by most
+cbase functions are either on or relative to the current record, so the
+initial step in a transaction on a cbase is usually to position the
+record cursor on the desired record.
+
+     When accessing the records in a cbase in the order that they are
+stored, the following functions are used to move the record cursor.
+
+    int cbrecfirst(cbase_t *cbp);
+    int cbreclast(cbase_t *cbp);
+    int cbrecnext(cbase_t *cbp);
+    int cbrecprev(cbase_t *cbp);
+
+The cbrecfirst function positions the record cursor to the first record,
+and cbreclast to the last record.  Before calling either of these
+functions cbreccnt should be used to test if the cbase is empty.
+
+	unsigned long cbreccnt(cbase_t *cbp);
+
+If the cbase is empty, there is no first or last record and so these
+functions would return an error.  The cbrecnext function advances the
+record cursor to the succeeding record, and cbrecprev retreats it to the
+preceding record.  In the record ordering, null is located before the
+first record and after the last.
+
+     There are also functions for saving the current position of the
+record cursor and resetting it to that position.
+
+    int cbgetrcur(cbase_t *cbp, cbrpos_t *cbrposp);
+    int cbsetrcur(cbase_t *cbp, const cbrpos_t*cbrposp);
+
+The cbgetrcur function gets the current position of the record cursor and
+saves it in the variable pointed to by cbrposp.  cbrpos_t is the cbase
+record position type, defined in <cbase.h>.  cbsetrcur can then be used
+later to set the record cursor back to that position.  The record cursor
+can be positioned on null by passing cbsetrcur the NULL pointer rather
+than a pointer to a variable.  Other than this special case, cbsetrcur
+should only be called with record cursor positions previously saved with
+cbgetrcur.  Also, a record position should not be considered valid if the
+cbase has been unlocked at any time since it was obtained.  This is
+because the database may have been altered by another process during that
+time, and the record at that position may have been deleted, and the
+location possible reused for a new record.  To reposition to a record
+after the cbase has been unlocked, a search on a unique key should be
+used.
+
+     The cbrcursor macro is used to test if the record cursor for a cbase
+is positioned on a record or on null.
+
+    void *cbrcursor(cbase_t *cbp);
+
+If the record cursor of the cbase pointed to by cbp is positioned on
+null, cbrcursor returns the NULL pointer.  If it is on a record,
+cbrcursor returns a value not equal to the NULL pointer.  This function
+is useful for loops needing to test when the last (or first) record has
+been reached. 
+
+     The cbrecalign function aligns the record cursor with a specified
+key cursor.
+
+    int cbrecalign(cbase_t *cbp, int field);
+
+field is the key with which to align the record cursor.  The relationship
+between the key cursors and the record cursor is explained in the next
+section.
+
+     Whether or not any the order of the records in a cbase has any
+significance is totally up to the applications.
+
+
+4.4  Key Cursor Position Functions
+
+     In addition to a record cursor, each open cbase also has a key
+cursor for each key defined for that cbase.  Like the record cursor, a
+key cursor is positioned either on a record in that cbase or on null. 
+To access a cbase in the sort order of a certain key, the appropriate key
+cursor is used instead of the record cursor.  Each key cursor moves
+independently of the others, but whenever a key cursor position is set,
+the record cursor is moved to the same record.  The key cursors are not
+affected by moving the record cursor.
+
+     The following functions are used to move a key cursor.
+
+    int cbkeyfirst(cbase_t *cbp, int field);
+    int cbkeylast(cbase_t *cbp, int field);
+    int cbkeynext(cbase_t *cbp, int field);
+    int cbkeyprev(cbase_t *cbp, int field);
+
+These perform as do the corresponding functions for the record cursor,
+and the same rules concerning locking apply.  Note that the key cursor
+functions can be used only with fields defined to be keys (see cbcreate
+in section 4.1).
+
+     The following function is used to search for a key of a certain 
+value.
+
+    int cbkeysrch(cbase_t *cbp, int field, const void *buf);
+
+field is the key to search for the data item pointed to by buf.  If the
+key is found, 1 is returned and the key and record cursors positioned to
+the record having that key.  If there is no record with that key, 0 is
+returned and the key and record cursor positioned to the record (possibly
+null) that would follow a record with that key value.
+
+     Since the key cursors do not automatically follow the record cursor,
+the situation sometimes occurs where the record cursor is positioned to
+the desired record, but the cursor for the key to be used next is not. 
+The cbkeyalign function is used to align a specified key cursor with the
+record cursor.
+
+    int cbkeyalign(cbase_t *cbp, int field);
+
+The reason the key cursors are not updated every time the record cursor
+moves is not because it would be in any way difficult to do so, but
+because this would increase the overhead enormously.  And since only one
+key cursor is normally used at a time, this extra overhead would almost
+never provide any benefit in return.
+
+     As for the record cursor, each key cursor position can be tested to
+be positioned on a record or on null.
+
+    void *cbkcursor(cbase_t *cbp, int field);
+
+If the key cursor specified by field of the cbase pointed to by cbp is
+positioned on null, cbkcursor returns the NULL pointer.  If it is on a
+record, cbkcursor returns a value not equal to the NULL pointer.
+
+
+4.5  Input/Output Functions
+
+     To read a record from a cbase, the record cursor for that cbase is
+first positioned to the desired record using either the record cursor
+position functions or the key cursor position functions.  One of the
+following functions is then called to read from the current record.
+
+    int cbgetr(cbase_t *cbp, void *buf);
+    int cbgetrf(cbase_t *cbp, int field, void *buf);
+
+cbp is a pointer to an open cbase and buf points to the storage area to
+receive the data read from the cbase.  The cbgetr function reads the
+entire current record, while cbgetrf reads the specified field from the
+current record.
+
+     The function for inserting a new record into a cbase is
+
+    int cbinsert(cbase_t *cbp, const void *buf);
+
+where buf points to the record to be inserted.  When a new record is
+inserted into a cbase, the position it holds relative to each key cursor
+is defined by the sort order for that key field.  There is no predefined
+sort order associated with the record cursor, however, and it is up to
+the user whether or not to store the records for each cbase in a sorted
+or unsorted order.  To store records in a sorted order, the record cursor
+is first positioned to the record after which to insert the new record. 
+cbinsert is then called to insert the record pointed to by buf after the
+current record.  If no sort order is desired, the step to position the
+record cursor is skipped, resulting in the record being inserted
+following whatever location the record cursor happens to be positioned.
+
+     The cbdelcur function is used to delete a record.
+
+    int cbdelcur(cbase_t *cbp);
+
+The record cursor must first be positioned on the record to delete, then
+cbdelcur called to delete the current record.  cbdelcur sets the record
+cursor to null.
+
+     The cbputr function writes over an existing record.
+
+    int cbputr(cbase_t *cbp, const void *buf);
+
+buf points to the new record contents.  Writing over an existing record
+is equivalent to deleting the record and inserting a new one in the same
+position in the file.  If the new record contains an illegal duplicate
+key, this will cause the insert to fail, resulting in the record having
+been deleted from the cbase.  The exact behavior that a program should
+have in such a circumstance is different for different applications, and
+so it is usually desirable to use cbdelcur and cbinsert directly rather
+than cbputr.
+
+
+4.6  Import/Export Functions
+
+     cbase data can be exported to a text file using the cbexport
+function.
+
+    int cbexport(cbase_t *cbp, const char *filename);
+
+Every record in cbase cbp is converted to a text format and written to
+the file filename.  The export file format is defined as follows.
+
+    - Each record is terminated by a newline ('\n').
+    - The fields in a record are delimited by vertical
+      bars ('|').
+    - Each field contains only printable characters.
+    - If a field contains the field delimiter
+      character, that character is replaced with \F.
+    - The individual elements of array data types are
+      exported as individual fields.
+
+     Data may be imported from a text file using the cbimport function.
+
+    int cbimport(cbase_t *cbp, const char *filename);
+
+cbimport reads each record from the text file filename and inserts it
+into the cbase cbp.  If cbimport encounters a record containing an
+illegal duplicate key, that record is skipped and the import continues
+on normally, but a value of -1 is returned with errno set to CBEDUP to
+notify the application that one or more records were skipped.  It is up
+to the application whether or not to treat this as a true error.
+
+     Data import/export is primarily used to move data between different
+database formats.  This sometimes requires some slight rearranging of the
+text before importing.  One common tool designed for just this sort of
+task is a awk.  Awk comes standard with UNIX, and is becoming available
+for most other systems, as well.  There are a few freeware versions of
+awk for DOS -- look for these on the Citadel BBS.
+
+     Figure 4.1 shows an awk program for inserting a new field at
+position two in all the records in a text file (note that awk field
+numbering starts at one, not zero).  The predefined variables FS and OFS
+are used to set the input and output field separators, respectively.  The
+predefined variables RS and ORS are used to set the input and output
+record separators, respectively.  Setting these variables appropriately
+is all that is necessary to convert between text file formats using
+different field and record separators.  The awk program in figure 4.2
+converts text files exported from a database using the tab character as
+a field separator to a format for import by cbase.
+
+BEGIN {
+    # set input and output field and record separators
+    FS  = "|";
+    OFS = FS;
+    RS  = "\n";
+    ORS = RS;
+    NEWFIELD = 2;       # field to insert
+}
+
+# insfld:  insert field n of current record
+function insfld(n)
+{
+    if (n < 1 || n > NF + 1) {
+        return -1;
+    }
+
+    for (i = NF; i >= n; --i) {
+        $(i + 1) = $i;
+    }
+    $n = "";
+
+    return 0;
+}
+
+{
+    # insert a new field in each record then print
+    if (insfld(NEWFIELD) == -1) {
+        printf "Error inserting new field %d.\n", NEWFIELD;
+        exit 1;
+    }
+    print $0;
+}
+
+END {
+    exit 0;
+}
+
+             Figure 4.1. awk Program to Insert a New Field
+
+
+BEGIN {
+    # set input and output field and record separators
+    FS  = "\t";
+    OFS = "|";
+    RS  = "\n";
+    ORS = RS;
+}
+
+{
+    # print each line with new separators
+    print $0
+}
+
+END {
+    exit 0;
+}
+
+       Figure 4.2. awk Program to Change Field/Record Separators
+
+
+
+
+                                            Chapter 5:  Custom Indexing
+
+
+     cbase automatically handles indexes on a single complete field.  In
+some instances, however, it is necessary to index on a combination of
+fields (i.e., compound keys), partial fields, or even data derived from
+but not actually stored in a record.  Because of the layered design of
+cbase, the btree library can be accessed directly by the application to
+maintain virtually any type of index, not necessarily for a cbase
+database.
+
+     The btree interface is very similar to that for cbase (most cbase
+key functions simply call a btree function for a specified index), and
+the reader is referred to the btree section of the reference manual for
+most of the details on the usage of this library.
+
+     The btcreate function to create a btree is of fundamental
+importance, since here is where the btree is actually defined, and a
+brief discussion of this is given below with a typical example.
+
+    int btcreate(const char *filename, int m, size_t keysize, int fldc,
+                                               const btfield_t fldv[]);
+
+The most apparent difference from cbcreate is the extra parameter m.  m
+specifies the order of the btree to be created.  The order is the maximum
+number of children that a node in the tree can have.  The order to be
+used depends on several factors such as the key size, but a value of
+around 10 will normally serve fairly well if the user does not wish to
+get into btree internals.  The advanced user who wishes to fine-tune an
+index is referred to COME79 and HORO76.
+
+     The filename, keysize, and field count all function just as for
+cbcreate.  The field list is the same in principle and has a similar
+structure.
+
+    typedef struct {
+        size_t  offset;     /* offset of field in key */
+        size_t  len;        /* field length */
+        int     (*cmp)(const void *p1, const void *p2, size_t n);
+                            /* comparison function */
+        int     flags;      /* flags */
+    } btfield_t;
+
+offset, len, cmp, and flags are all the same as for cbcreate.  Valid
+btree field flags are
+
+    BT_FASC     ascending order
+    BT_FDSC     descending order
+
+The fields in fldv must be ordered from the major sort first to the most
+minor sort last.
+
+     The logical organization of cbase indexes is referred to by the term
+inverted file.  An inverted file is quite simply a table of sorted keys
+each paired with a pointer to the record containing that key; note that
+the term inverted file does not imply any specific file structure (i.e.,
+B-tree, hash, etc.).  A book index is an inverted file where words (keys)
+from the text (database) are each paired with a page number (pointer) to
+the page (record) containing that word.  In a cbase inverted file, the
+pointer is a cbase record position, whose type cbrpos_t is defined in
+<cbase.h>.  The last member of a btree key structure for a cbase index
+is a cbase record position.
+
+     B-trees by nature do not allow duplicate keys.  But for an inverted
+file the key in combination with the record position will always be
+unique, thus the effect of duplicate keys can be produced by including
+the record position as the most minor sort field.  To constrain a key to
+be unique, simply leave the record position out of the field list.  A
+comparison function cbrposcmp for cbase record positions is included in
+the cbase library.  Whenever a custom index is being maintained for a
+cbase, care must be taken to update the index in parallel with the cbase
+to prevent them getting out of sync.  The record position in the key is
+obtained with cbgetrcur.
+
+     The code fragment below shows how a compound key allowing duplicates
+for a name stored as separate fields.  The example program in the next
+chapter will handle names without compound keys.  Note that the fields
+in the key are actually stored first-middle-last to facilitate copying
+from the record structure.  It is the order in the field list which
+defined the relative sort precedences of the fields.
+
+    record name {               /* DDL record definition */
+        t_string    nm_first[12];
+        t_string    nm_mi[1];
+        t_string    nm_last[12];
+        t_string    nm_addr[80];
+    };
+
+    struct lfmkey {
+        char        first[12];
+        char        mi[1];
+        char        last[12];
+        cbrpos_t    rpos;
+    };
+
+    btfield_t lfmfldv[] = {     /* last name first index */
+        {
+            offsetof(struct lfmkey, last),
+            sizeofm(struct lfmkey, last),
+            strncmp,
+            BT_FASC,
+        },
+        {
+            offsetof(struct lfmkey, first),
+            sizeofm(struct lfmkey, first),
+            strncmp,
+            BT_FASC,
+        },
+        {
+            offsetof(struct lfmkey, mi),
+            sizeofm(struct lfmkey, mi),
+            strncmp,
+            BT_FASC,
+        },
+        {
+            sizeof(struct lfmkey),
+            sizeofm(struct lfmkey, rpos),
+            cbrposcmp,
+            BT_FASC,
+        },
+    };
+
+    #define LFMFLDC (nelems(lfmfldv))
+
+
+
+
+                                         Chapter 6:  An Example Program
+
+
+     Included with cbase is rolodeck, an complete example program
+illustrating the use of cbase.  Rolodeck is a program for storing
+business cards.  To allow it to be compiled without requiring any
+additional libraries for displays, and because the purpose of the program
+is purely instructional, the program has been given only a simple
+scrolling user interface.  The source for rolodeck is included with
+cbase.
+
+     Prior to performing any database operations, provision must be made
+to flush any buffered on termination of the application.  This is done
+by registering the blkio function bcloseall to be automatically called
+on exit.
+
+    /* register termination function to flush database buffers */
+    if (atexit(bcloseall)) {
+        perror("atexit");
+        exit(EXIT_FAILURE);
+    }
+
+If atexit is not available, bexit must be used everywhere in place of
+exit.
+
+     Rolodeck uses a simple index for names by storing the name in a
+single field last-name-first.  To allow the user to input names
+first-name-first and to display names in the same manner, the following
+two functions are used to convert between the two formats.
+
+    int fmltolfm(char *t, const char *s, size_t n);
+    int lfmtofml(char *t, const char *s, size_t n);
+
+Another support function, cvtss, is also used throughout rolodeck to
+perform string conversions such as removing white space.  See the
+respective reference manual entries for more information on each of these
+functions.
+
+
+6.1  Data Definition
+
+     The first step in writing a program using cbase is to define the
+data to be stored.  This should be done in a separate header file for
+each record type to be used.  Figure 6.1 lists rolodeck.ddl, the data
+definition for the business card record type used by the rolodeck
+program.  Note that there is no need to store the terminating nul
+character for string data, unless, of course, it is shorter than the
+field size.
+
+   Figure 6.2 lists the database definition header generated from
+rolodeck.ddl by cbddlp.  The macro H_ROLODECK tested then defined at the
+top is simply to prevent the header from being processed more than once
+if included multiple times in the same module.  The contents of the file
+are the cbase name ROLODECK, the C struct rolodeck for manipulating
+record in memory, the field macros RD_*, and the field count and list
+RDFLDC and rdfldv, all generated as described in Chapter 3.  The include
+file rolodeck.i should be included in the main rolodeck module.  Details
+of its contents are normally or no concern to the application.
+/* constants */
+#define NAME_MAX    (40)    /* maximum name length */
+#define ADDR_MAX    (40)    /* maximum address length */
+#define NOTELIN_MAX (4)     /* note lines */
+#define NOTECOL_MAX (40)    /* note columns */
+
+/* file assignments */
+data  file "rolodeck.dat" contains rolodeck;
+index file "rdcont.ndx"   contains rd_contact;
+index file "rdcomp.ndx"   contains rd_company;
+
+/* record definitions */
+record rolodeck {                      /* rolodeck record */
+    unique key t_string
+                 rd_contact[NAME_MAX]; /* contact name */
+    t_string     rd_title[40];         /* contact title */
+    key t_string rd_company[NAME_MAX]; /* company name */
+    t_string     rd_addr[ADDR_MAX];    /* address */
+    t_string     rd_city[25];          /* city */
+    t_string     rd_state[2];          /* state */
+    t_string     rd_zip[10];           /* zip code */
+    t_string     rd_phone[12];         /* phone number */
+    t_string     rd_ext[4];            /* phone extension */
+    t_string     rd_fax[12];           /* fax number */
+    t_string     rd_notes[NOTELIN_MAX * NOTECOL_MAX];
+                                       /* notes */
+};
+
+           Figure 6.1.  Definition of the Rolodeck Database
+
+
+#ifndef H_ROLODECK
+#define H_ROLODECK
+
+/* libray headers */
+#include <cbase.h>
+
+#define NAME_MAX    (40)    /* maximum name length */
+#define ADDR_MAX    (40)    /* maximum address length */
+#define NOTELIN_MAX (4)     /* note lines */
+#define NOTECOL_MAX (40)    /* note columns */
+
+/* record name */
+#define ROLODECK    "rolodeck.dat"
+
+/* rolodeck record definition */
+typedef struct rolodeck {
+    char rd_contact[NAME_MAX];
+    char rd_title[40];
+    char rd_company[NAME_MAX];
+    char rd_addr[ADDR_MAX];
+    char rd_city[25];
+    char rd_state[2];
+    char rd_zip[10];
+    char rd_phone[12];
+    char rd_ext[4];
+    char rd_fax[12];
+    char rd_notes[NOTELIN_MAX * NOTECOL_MAX];
+} rolodeck_t;
+
+/* field names for record rolodeck */
+#define RD_CONTACT  (0)
+#define RD_TITLE    (1)
+#define RD_COMPANY  (2)
+#define RD_ADDR     (3)
+#define RD_CITY     (4)
+#define RD_STATE    (5)
+#define RD_ZIP      (6)
+#define RD_PHONE    (7)
+#define RD_EXT      (8)
+#define RD_FAX      (9)
+#define RD_NOTES    (10)
+#define RDFLDC      (11)
+
+/* field definition list for record rolodeck */
+extern cbfield_t rdfldv[RDFLDC];
+
+#endif
+
+               Figure 6.2. Rolodeck Database Header File
+     It should be noted that every record type should normally have at
+least one unique key field that can be used to uniquely identify records. 
+As mentioned in Section 4.3, the physical record position cannot be
+relied upon after the cbase has been unlocked.
+
+
+6.2  Opening a cbase
+
+     The first step in accessing an existing cbase is to open it.  Figure
+6.3 shows the code from rolodeck.c to open the rolodeck cbase.  rolodeck
+is opened with a type argument of "r+" to allow both reading and writing. 
+The other arguments are the cbase name, ROLODECK, the field count,
+RDFLDC, and the field definition list, rdfldv, all defined in the data
+definition header file, rolodeck.h.  On error cbopen returns the NULL
+pointer.  For this program there is only one cbase, but most applications
+will have more.
+
+     If the named cbase does not exist, cbopen will fail and set errno
+to ENOENT.  In this example, if the rolodeck cbase does not exist, it is
+created and the program continues as normal.  Note that the cbase must
+still be opened after it is created.  In some cases a separate program
+is written to create all the cbases required by an application, in which
+case the main program would interpret ENOENT as an error and exit.
+
+/* open rolodeck cbase */
+cbp = cbopen(ROLODECK, "r+", RDFLDC, rdfldv);
+if (cbp == NULL) {
+    if (errno != ENOENT) {
+        fprintf(stderr, "cbopen:  error %d.\n", errno);
+        exit(EXIT_FAILURE);
+    }
+    /* create rolodeck cbase */
+    puts("Rolodeck does not exist.  Creating...");
+    if (cbcreate(ROLODECK, sizeof(struct rolodeck), RDFLDC, rdfldv) ==
+-1) {
+        fprintf(stderr, "cbcreate:  error %d.\n", errno);
+        exit(EXIT_FAILURE);
+    }
+    cbp = cbopen(ROLODECK, "r+", RDFLDC, rdfldv);
+    if (cbp == NULL) {
+        fprintf(stderr, "cbopen:  error %d.\n", errno);
+        exit(EXIT_FAILURE);
+    }
+}
+
+                      Figure 6.3. Opening a cbase
+
+
+6.3  Locking a cbase
+
+     Before accessing an open cbase, it must first be locked.  If data
+is to be written to the cbase, it must be write locked, otherwise only
+a read lock is required.  A cbase can be read locked by more than one
+process at the same time, and read locks are therefore also called shared
+locks.  A write lock, on the other hand, is an exclusive lock; a write
+locked cbase can be neither read nor write locked by any other process. 
+Write locks are exclusive because, if one process tried to read data
+while it was partially modified by another, the data would probably be
+in an inconsistent state.  Processes that will only read data, however,
+can safely do so concurrently.
+
+     While a cbase is write locked, other processes needing to access
+that cbase must wait until it is unlocked so that they can in turn lock
+it themselves to complete their processing.  While a cbase is read
+locked, only processes needing to write must wait.  Using a write lock
+when a read lock would suffice will therefore delay other processes
+unnecessarily.  Locks of either type should be held for the shortest time
+possible; a common mistake in writing multiuser applications is to pause
+for use input while holding a lock, causing that lock to be held
+indefinitely.
+
+     If an attempt is made to obtain a lock on a cbase, but is blocked
+by a lock held by another process, cblock will fail and set errno to
+EAGAIN.  The call to cblock is therefore usually made in a loop with a
+predefined maximum number of tries.  It is convenient to place this in
+a function configured for the application being developed.  Figure 6.4
+shows this function from rolodeck.c.  It may also be suitable in some
+instances to sleep for a short (possibly random) time between attempts
+to lock.
+
+#define LCKTRIES_MAX (50)    /* max lock tries */
+
+/* rdlock:  rolodeck lock */
+int rdlock(cbase_t *cbp, int ltype)
+{
+    int i = 0;
+
+    for (i = 0; i < LCKTRIES_MAX; ++i) {
+        if (cblock(cbp, ltype) == -1) {
+            if (errno == EAGAIN) {
+                continue;
+            }
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    errno = EAGAIN;
+    return -1;
+}
+
+                 Figure 6.4. Rolodeck Locking Function
+
+     There are also two lock types (CB_RDLKW and CB_WRLKW) which, if the
+requested lock is blocked, will wait until it can be obtained.  These are
+not usually used, however, because if the lock does not become free in
+a reasonable time, the process waiting for the lock will be hung.
+
+     For applications where there will be only a single process accessing
+the database, the necessary locks can be set immediately after opening
+the cbases to be accessed and left locked.
+
+     One critical concern when locking multiple cbases is the possibility
+of deadlock.  Deadlock is an extensive subject, and there are a number
+of ways of dealing with it.  Most texts on operating systems (see CALI82)
+and database theory cover the subject in detail.
+
+
+6.4  Accessing a cbase
+
+     The gross structure of the rolodeck program is a case statement
+within a loop.  At the start of the loop a user request is read and used
+to select the action performed in the case statement.  Each individual
+action performed in the case statement illustrates the use of cbase to
+perform a basic operation, e.g., inserting a record, deleting a record,
+finding the next record, exporting data to a text file, etc.  The
+operation of finding the next record serves as a good general example. 
+The code for this from rolodeck.c is shown in figure 6.5.
+
+     One of the most important points to notice in the example code is
+that a unique key (the contact name, here) rather than a saved record
+position is used to relocate the current record when a cbase is locked. 
+Because of this, cbsetrpos cannot be used with a record position obtained
+during a previously held lock.
+
+     Another central point is the use of multiple keys.  In the rolodeck
+program, both the contact and the company names are keys.  A variable sf
+is used in rolodeck.c to identify the current sort field, which can be
+changed interactively.  Before using the cbkeynext function, the
+appropriate key cursor must first be positioned.  cbkeysrch positions
+only the key being searched, here being the unique key.  If the next card
+is to be found using the sort order of a different key, cbkeyalign must
+first be used to align that key cursor with the current record.
+
+case REQ_NEXT_CARD:     /* next card */
+    rdlock(cbp, CB_RDLCK);
+    if (cbreccnt(cbp) == 0) {
+        printf("The rolodeck is empty.\n\n");
+        rdlock(cbp, CB_UNLCK);
+        continue;
+    }
+    /* use unique key field to set rec cursor */
+    found = cbkeysrch(cbp,RD_CONTACT, rd.rd_contact);
+    if (sf != RD_CONTACT) {
+        /* align cursor of sort key */
+        cbkeyalign(cbp, sf);
+    }
+    if (found == 1) {
+        /* advance key (and rec) cursor 1 pos */
+        cbkeynext(cbp, sf);
+    }
+    if (cbrcursor(cbp) == NULL) {
+        printf("End of deck.\n\n");
+        rdlock(cbp, CB_UNLCK);
+        continue;
+    }
+    cbgetr(cbp, &rd);
+    rdlock(cbp, CB_UNLCK);
+    break;
+
+                   Figure 6.5. Next Rolodeck Record
+
+
+6.5  Closing a cbase
+
+     When a program is through accessing a cbase, the cbase should be
+closed.  Figure 6.6 shows this code from rolodeck.c.
+
+    /* close cbase */
+    if (cbclose(cbp) == -1) {
+        fprintf(stderr, "cbclose:  error %d.\n", errno);
+        bexit(EXIT_FAILURE);
+    }
+
+                      Figure 6.6. Closing a cbase
+
+A cbase is automatically unlocked when it is closed.
+
+
+6.6  Storing Variable Length Text
+
+     The example database of this chapter has a free-form text field for
+storing notes, the length of which is fixed at four lines.  For this
+application a fixed-length design is not inappropriate, but in many
+instances a database must be able to handle text without length
+restrictions.  A bulletin board message system is an example of this.
+
+     This problem is easily addressed by organizing the text as a
+collection of line records rather than as a single block of text.  In
+addition to the text itself, each line record would contain an number
+identifying the block of text to which it belongs, and the number of the
+line in that text block.  Figure 6.7 shows a modified definition for the
+rolodeck database that uses variable-length notes.
+
+/* constants */
+#define NAME_MAX    (40)    /* name length max */
+#define ADDR_MAX    (40)    /* address length max */
+#define LINLEN_MAX  (40)    /* line length max */
+
+/* file assignments */
+data  file "rolodeck.dat" contains rolodeck;
+index file "rdcont.ndx"   contains rd_contact;
+index file "rdcomp.ndx"   contains rd_company;
+
+/* record definitions */
+record rolodeck {                      /* rolodeck record */
+    unique key t_string
+                 rd_contact[NAME_MAX]; /* contact name */
+    t_string     rd_title[40];         /* contact title */
+    key t_string rd_company[NAME_MAX]; /* company name */
+    t_string     rd_addr[ADDR_MAX];    /* address */
+    t_string     rd_city[25];          /* city */
+    t_string     rd_state[2];          /* state */
+    t_string     rd_zip[10];           /* zip code */
+    t_string     rd_phone[12];         /* phone number */
+    t_string     rd_ext[4];            /* phone extension */
+    t_string     rd_fax[12];           /* fax number */
+    t_int        rd_notes;             /* notes */
+};
+
+record text {                          /* text record */
+    t_int        tx_textno;            /* text number */
+    t_uchar      tx_lineno;            /* line number */
+    t_string     tx_line[LINLEN_MAX];  /* line of text */
+};
+
+      Figure 6.7.  A Rolodeck Database with Variable Length Text
+
+     In this new rolodeck database, only an integer tag identifying the
+note is stored in the rolodeck record.  The actual text is retrieved
+using the following compound key.
+
+    struct textkey {
+        int             textno;
+        unsigned char   lineno;
+        cbrpos_t        rpos;
+    };
+
+textno is the major sort field and lineno the minor sort.  The key must
+be unique, so the record position should not be included as a sort field
+(see Chapter 5).
+
+     The use of a compound key can be avoided by packing the text number
+and line number into a single long integer as shown in the following DDL
+and C code fragments.
+
+    record text {                                   /* text record */
+        unique key t_ulong  tx_textid;              /* text id */
+        t_string            tx_line[LINLEN_MAX];    /* line of text */
+    };
+
+    text.tx_textid = textno << 8 | lineno;
+
+Placing the text number in the higher order bytes has the effect of
+making it the major sort.
+
+
+
+
+                                 Appendix A:  Installation Instructions
+
+     cbase is distributed in DOS format on either a 3.5" DSDD
+(double-sided, double-density) or a 5.25" DSDD diskette.  The files are
+compressed into a single archive, and the appropriate archive utility
+will be required to unarchive the files.  The currently available archive
+formats are ZIP and ZOO.  The commands to unarchive for each of these
+formats are:
+
+     pkunzip filename.zip
+     zoo -extract filename.zoo
+
+     Any operating system besides DOS will require either a facility to
+read DOS diskettes or access to an DOS machine from which files can be
+transferred (e.g., by a serial link or network) to the target machine. 
+If the transfer process does not automatically convert the text files to
+the format of the target system, an additional conversion utility will
+be necessary; if using FTP (Internet File Transfer Protocol), the ascii
+command will turn on text file translation.
+
+     Where not explicitly stated otherwise, the following instructions
+assume:  a DOS system, installation from drive A: to drive C:, the ZIP
+archive format, an include directory \usr\include, a library directory
+\usr\lib, and Borland Turbo C.  RL is used to indicate where a release
+and level number appear in a filename(i.e., cbaseRL.zip would actually
+be something like cbase102.zip).
+
+     The first steps in the installation are to create a cbase directory
+in the filesystem, copy the distribution diskette to this directory, and
+unarchive the distribution.
+
+     C:\> mkdir cbase
+     C:\CBASE> cd cbase
+     C:\CBASE> xcopy a:\ .
+     C:\CBASE> pkunzip cbaseRL.zip
+
+     Before proceeding any further, any readme files should be scanned
+for last-minute notes; readme files have the extension .rme.  If the
+installation is an upgrade, the file rlsnotes.txt should be read
+carefully before compiling any existing applications.
+
+     Among the files extracted from the archive will be several subset
+archives.  These include:
+
+	blkioRL.zip	blkio library
+	btreeRL.zip	btree library
+	lseqRL.zip	lseq library
+	cbase.zip	cbase library
+	manxRL.zip	manx utility
+	rolodeck.zip	example program
+	*bats.zip	DOS batch files for additional compilers
+
+Each of these should be unarchived in its own subdirectory.
+
+     C:\CBASE> mkdir manx
+     C:\CBASE\MANX> cd manx
+     C:\CBASE\MANX> pkunzip ..\manxRL.zip
+
+manx is used to extract an on-line copy of the reference manual.
+
+     At this point all the libraries, utilities, examples, etc. are
+unarchived in separate directories, and the main installation can begin. 
+Details steps are given in the following sections for each currently
+supported operating system.
+
+     If an upgrade from previous release is being performed, it is
+essential that the libraries be installed in the correct order.  If the
+new btree were installed while the old blkio header were still in use,
+the results can be unpredictable.
+
+     The DOS installation batch files, install.bat, each take two
+arguments.  The first specifies the memory model, legal values for which
+are s, m, c, l, and h; the library file is named MLIB.lib, where LIB
+would be the library name and M would correspond to the memory model of
+the library.  The second, if present, causes the reference manual to be
+extracted from the source code into the file LIB.man, where LIB would
+again be the library name.  The main batch file included with each
+library is written for Borland Turbo C.  Because there is so little
+uniformity among C compilers for DOS, modifications will be required for
+other compilers.  Instructions for making these straightforward
+modifications are given at the beginning of each install.bat.  Some batch
+files modified for other compilers can be found in archives of the form
+*bats.zip included in the distribution (e.g., bcbats.zip for Borland C++
+and mscbats for Microsoft C), while additional ports may be found on the
+Citadel BBS.  If a make utility is available, the UNIX makefiles may
+instead be adapted.
+
+     Common to all systems is the ANSI compatibility header <ansi.h>. 
+This header contains a number of macros that are used to specify what
+ANSI features are supported by the compiler being used.  For instance,
+the AC_PROTO definition would be removed if function prototyping is not
+supported.  As shipped, <ansi.h> is set up for a fully ANSI compiler. 
+See the <ansi.h> manual entry or the man header of <ansi.h> itself for
+more detailed instructions.
+
+     If no multiuser applications are to be developed, file locking can
+be disabled by defining the macro SINGLE_USER in blkio_.h.  This is
+primarily intended to allow DOS applications to run without share being
+loaded, and for older UNIX systems without file locking.  It will still
+be necessary for an application to call the lock functions to set the
+flags monitored internally by the libraries.  If SINGLE_USER is not
+defined under DOS, then share must be loaded for a cbase application to
+run.  DOS only provides exclusive locks, so two processes cannot have the
+same cbase read-locked concurrently.
+
+
+A1.  manx
+
+                                  DOS
+
+     1. Edit then install ANSI compatibility header.
+             > copy ansi.h c:\usr\include
+     2. Compile manx.
+             > tcc -O -A -ms manx.c
+     3. Install manx in a directory in the path.
+             > copy manx.exe c:\usr\bin
+
+
+                                 UNIX
+     1. Edit then install ANSI compatibility header.
+             $ su
+             # cp ansi.h /usr/include
+             # ^d
+     2. Compile manx.
+             $ make manx
+     3. Install manx in a directory in the path.
+             $ su
+             # make install
+             # ^d
+     4. Extract the on-line reference manual.
+             $ make man
+
+
+A2.  The blkio Library
+
+                                  DOS
+
+     1. Set the OPSYS macro in blkio_.h to OS_DOS.
+     2. Set the CCOM macro in blkio_.h to the C compiler being
+        used.
+     3. Reinstate the SINGLE_USER macro in blkio_.h if no multiuser
+        applications will be developed.
+     4. If necessary, modify install.bat for the C compiler being
+        used.
+     5. Extract the reference manual and build and install the blkio
+        library.
+             > install l x
+        Run again for each additional memory model desired, without the
+        x argument.
+
+
+                                 UNIX
+
+     1. Install the boolean header file.
+             $ su
+             # cp bool.h /usr/include
+             # ^d
+     2. Set the OPSYS macro in blkio_.h to OS_UNIX.
+     3. Set the CCOM macro in blkio_.h to the C compiler being
+        used.
+     4. Reinstate the SINGLE_USER macro in blkio_.h if no multiuser
+        applications will be developed.
+     5. Extract the on-line reference manual.
+             $ make man
+     6. Build the blkio library.
+             $ make blkio
+     7. Install the blkio library.  This will copy the blkio header
+        file blkio.h to /usr/include and the blkio library archive
+        to /usr/lib.
+             $ su
+             # make install
+             # ^d
+
+
+A3.  The lseq Library
+
+                                  DOS
+
+     1. Install the blkio library.
+     2. If necessary, modify install.bat for the C compiler
+        being used.
+     3. Install the lseq library.
+             > install l x
+        Run again for each additional memory model desired, without the
+        x argument.
+
+
+                                 UNIX
+
+     1. Install the blkio library.
+     2. Extract the on-line reference manual.
+             $ make man
+     3. Build the lseq library.
+             $ make lseq
+     4. Install the lseq library.  This will copy lseq.h to
+        /usr/include and the lseq library archive to /usr/lib.
+             $ su
+             # make install
+             # ^d
+
+
+A4.  The btree Library
+
+                                  DOS
+
+     1. Install the blkio library.
+     2. If necessary, modify install.bat for the C compiler
+        being used.
+     3. Install the btree library.
+             > install l x
+        Run again for each additional memory model desired, without the
+        x argument.
+
+
+                                 UNIX
+
+     1. Install the blkio library.
+     2. Extract the on-line reference manual.
+             $ make man
+     3. Build the btree library.
+             $ make btree
+     4. Install the btree library.  This will copy btree.h to
+        /usr/include and the btree library archive to
+        /usr/lib.
+             $ su
+             # make install
+             # ^d
+
+
+A5.  The cbase library
+
+                                  DOS
+
+     1. Install the btree and lseq libraries.
+     2. If necessary, modify install.bat for the C compiler
+        being used.
+     3. Install the cbase library.
+             > install l x
+        Run again for each additional memory model desired, without the
+        x argument.
+
+
+                                 UNIX
+
+     1. Install the btree and lseq libraries.
+     2. Extract the on-line reference manual.
+             $ make man
+     3. Build the cbase library.
+             $ make cbase
+     4. Install the cbase library.  This will copy cbase.h to
+        /usr/include and the cbase library archive to/usr/lib.
+             $ su
+             # make install
+             # ^d
+
+A6.  Combining Libraries
+
+     To shorten the command line required to link a cbase application,
+it may be desirable to combine the cbase libraries.
+
+
+                                  DOS
+
+     1. Build the combined library (large model).
+             > tlib lcbasec.lib +lcbase.lib +llseq.lib +lbtree.lib
+                                                     +lblkio.lib
+     2. Install the combined library.
+             > copy lcbasec.lib \usr\lib
+     3. Report for other memory models.
+
+
+                                 UNIX
+
+     1. Build the combined library.
+             $ ar rv cbasec cbase lseq btree blkio
+     2. Install the combined library.
+             $ su
+             # mv cbasec /usr/lib/libcbasec.a
+             # ^d
+
+
+A7.  cbddlp
+
+     In addition to a C compiler, cbddlp required the parser-generator
+yacc and the lexical analyzer-generator lex.  Since these are not yet
+widely used on DOS systems, an executable cbddlp for DOS is included with
+cbase.
+
+                                  DOS
+
+     1. Install cbddlp in a directory in the path.
+             > copy cbddlp.exe c:\usr\bin
+
+
+                                 UNIX
+
+     1. Install the cbase libraries.
+     2. Set the PATHDLM macro in cbddlp.h to '/'.
+     3. Extract the on-line reference manual.
+             $ make man
+     4. Compile cbddlp.
+             $ make cbddlp
+     5. Install cbddlp in a directory in the path.
+             $ su
+             # make install
+             # ^d
+
+
+A8.  rolodeck
+
+                                  DOS
+     1. Install cbase.
+     2. If necessary, modify install.bat for the C compiler
+        being used.
+     3. Compile rolodeck, and extract the reference manual.
+             > install l x
+
+
+                                 UNIX
+     1. Install cbase.
+     2. Compile rolodeck.
+             $ make rolodeck
+     3. Extract the reference manual.
+             $ make man
+
+
+A9.  Troubleshooting
+
+                                Compile
+
+Warnings
+	During the course of the installation the compiler may issue a
+	number of warnings.  In particular, "code not reached" is to be
+	expected throughout, and "unused function parameter" may occur a
+	number of times in cbcmp.c, cbexp.c, and cbimp.c.  These warnings
+	should cause no concern, and no attempt should be made to quell
+	them by editing the source.  The "code not reached warnings" are
+	due to breaks in switch statements following a return or continue,
+	and these have been placed there intentionally.  The lint program
+	checker under UNIX provides the -b option to suppress warnings
+	about superfluous breaks, but most DOS C compilers regrettably have
+	no such option.  The "unused function parameter" warnings result
+	from functions that are accessed internally through arrays and so
+	must all have the same parameter list, even though some do not have
+	the need to reference all the parameters.
+
+Errors
+	First check that OPSYS and CCOM have been defined correctly in
+	blkio_.h, then that <ansi.h> has been set up correctly for the
+	compiler being used.  If upgrading, be certain that the libraries
+	are being installed in the correct order, otherwise a high-level
+	library might be compiled with the header from an older low-level
+	library.  It the source of the error cannot be determined and
+	corrected, upload the following to the Citadel BBS:  the
+	install.bat file being used, a dump of the compiler error message,
+	and details of the system configuration (operating system,
+	compiler, versions of each).  A message giving the name of the
+	upload file should be addressed to Tech Support.
+
+
+                                 Link
+
+Command Line Too Long
+	Use the combined library cbasec to shorten the command line.  See
+	Appendix A6 for instructions on building a combined library.
+
+Symbol Defined More Than Once
+	If the named symbol is not defined in the application itself, then
+	the conflict is between two libraries being used.  If the source
+	is not available for either of those libraries, then little can be
+	done.  Since cbase comes with complete source, a duplicated
+	symbol here can be changed to eliminate the conflict.  Be certain
+	to recompile the library containing the altered symbol as well as
+	any higher-layer libraries, in ascending order.
+
+
+                               Execution
+
+Under DOS, cbcreate returns EINVAL, but all arguments are correct.
+	Make sure share is loaded.  share should be in either config.sys
+	or autoexec.bat to ensure that it is always loaded.
+
+Under DOS, the maximum open file limit is exceeded.
+	A series of steps is required to increase the number of open
+	database files allowed.  First, the size of the system file table
+	must be increased to at least the required limit using the FILES
+	command in config.sys.  Second, the process file descriptor table
+	must be enlarged by using the fdcset function included with the
+	rolodeck example program.  Lastly, the file tables in each of the
+	cbase libraries must be increased to the desired limit by changing
+	the macros *OPEN_MAX in each of the library header files, then
+	recompiling; it is essential that the libraries be recompiled in
+	the correct order.
+
+
+
+
+
+                                   Appendix B:  Defining New Data Types
+
+
+     cbase is designed to allow custom data types to be defined by the
+user.  Custom data types are currently implemented in exactly the same
+way as the predefined types and become indistinguishable from those
+predefined.  A data type definition consists of a macro used as the type
+name (e.g., t_string), and three functions:  a comparison function, an
+export function, and an import function.  The comparison function is the
+most important; it determines the sort order for data of that type.  The
+export function is used to export data of the associated type to a text
+file, and the import function to import data.  Below are given
+step-by-step instructions for defining a new cbase data type.
+
+
+B1.  The Type Name
+
+     For each cbase data type there is a corresponding type name by which
+the user refers to that data type.  Type names are macros that must be
+defined as integers starting at zero and increasing in steps of one. 
+The type name for a new data type would be added at the end of this list,
+and be defined as an integer one greater than the last data type in the
+list.  To avoid possible conflict with future predefined types, user
+defined type names should not start with t_; the prefix ut_ is
+recommended.  The type names are macros defined in <cbase.h>.
+
+    #define t_char      (0)     /* signed character */
+    ...
+    #define t_binary    (26)    /* binary data */
+    #define ut_new      (27)    /* new data type */
+
+
+B2.  The Comparison Function
+
+     A data type is characterized primarily by its sort order.  Each data
+type is given a comparison function defining this sort order.  Comparison
+functions are of the form
+
+    int cmp(const void *p1, const void *p2, size_t n);
+
+p1 and p2 are pointers to two data items to be compared, and n is the
+size of the data items.  The value returned must be less than, equal to,
+or greater than zero if the data item pointed to by p1 is less than,
+equal to, or greater than, respectively, that pointed to by p2.  The C
+standard library function memcmp would be a valid cbase comparison
+function.
+
+     All cbase comparison functions are located in the file cbcmp.c. 
+For a new data type, a comparison function would be added in this file. 
+
+    static int newcmp(const void *p1, const void *p2, size_t n)
+    {
+        ...
+    }
+
+     Comparison functions are made static because they are accessed by
+cbase only through an array of function pointers, cbcmpv, also defined
+in cbcmp.c.  This array contains the comparison function for each cbase
+data type.  The integer value of the type name is used by cbase as an
+index into this array, and so it is absolutely necessary that the
+comparison functions must be in the same order as the type names.  A
+pointer to the comparison function for a new data type would be added at
+the end of this array.
+
+    /* cbase comparison function table */
+    cbcmp_t cbcmpv[] = {
+        charcmp,    /* t_char */
+        ...
+        bincmp,     /* t_binary */
+        newcmp,     /* ut_new */
+    };
+
+
+B3.  The Export and Import Functions
+
+     Each data type has an associated export function.  This export
+function takes a data item of the associated type and writes it to a file
+in a text format.  Export functions are of the form
+
+    int exp(FILE *fp, const void *p, size_t n);
+
+p is a pointer to the data item of size n to be exported.  The export
+function converts the data item to text, then writes it to the current
+position in file fp.  Upon successful completion, a value of zero is
+returned.  Otherwise, a value of -1 is returned.  See the cbexport
+reference manual entry for special requirements on exported data.
+
+     All cbase export functions are located in the file cbexp.c.  For a
+new data type, an export function would be added in this file.
+
+    static int newexp(FILE *fp, const void *p, size_t n)
+    {
+        ...
+    }
+
+     Just as with comparison functions, export functions are accessed by
+cbase through an array.  This array, cbexpv, is defined in cbexp.c.  A
+pointer to the export function for the new data type would be added at
+the end of this array.
+
+     The import function reads a data item from a text file.  Import
+functions are of the form
+
+    int imp(FILE *fp, void *p, size_t n);
+
+The parameters and return value are the same as for the export function. 
+Import functions are located in cbimp.c.  Pointers to the import
+functions are stored in the array cbimpv.
+
+
+B4.  The Type Count
+
+     The macro CBTYPECNT is defined in cbase_.h as the number of data
+types defined.  It must be incremented by one for each new data type
+added.
+
+
+     After completing these steps, the cbase library must be rebuilt (see
+Appendix A) to make the new data type accessible.  The underlying
+libraries do not need to be rebuilt.
+
+
+
+
+                         Appendix C:  Porting to a New Operating System
+
+
+     The blkio library provides a means for portable access to structured
+files just as the stdio library does for text files.  blkio is thus the
+only library requiring modification to port to a new operating system. 
+Layering within the library further isolates the modifications to just
+three files.  The steps necessary to perform this port are outlined
+below.
+
+
+C1.  The OPSYS and CCOM Macros
+
+     In the blkio library's private header file blkio_.h, a macro is
+defined for each supported operating system.  When installing the blkio
+library, the host operating system is selected by defining the OPSYS
+macro as one of these OS macros.  When porting to a new operating system,
+an OS macro definition for that system must be added in blkio_.h.  These
+macros are given names of the form OS_* and assigned unique integers.
+
+    #define OS_UNIX (1)     /* UNIX */
+    #define OS_DOS  (2)     /* DOS */
+    #define OS_NEW  (3)     /* new OS */
+    #define OPSYS   OS_NEW
+
+     In many instances it is necessary to take into account differences
+between the C compilers available for a system beyond the ANSI
+compatibility handled by <ansi.h>.  As with the operating system, a macro
+is defined for each supported C compiler, and the compiler selected with
+the CCOM macro in blkio_.h.  When porting to a new C compiler, a CC macro
+definition for that compiler must be added in blkio_.h.  These macros are
+given names of the form CC_* and assigned unique integers.
+
+    #define CC_BC   (1)     /* Borland C */
+    #define CC_MSC  (2)     /* Microsoft C */
+    #define CC_NEW  (3)     /* new C compiler */
+    #define CCOM    CC_NEW
+
+
+C2.  The File Descriptor Type
+
+     In most operating systems, an open file is accessed not by name,
+but through some sort of tag, usually called a file descriptor.  File
+descriptors are normally of type int, but blkio uses a union for the file
+descriptor in order to enable it to handle any type.  This union is
+defined in blkio_.h.
+
+    typedef union {     /* file descriptor type */
+        char    c;      /* character */
+        short   s;      /* short int */
+        int     i;      /* int */
+    } fd_t;
+
+     fd_t is used exclusively for the fd member of the BLKFILE structure.
+
+    typedef struct {    /* block file ctl struct */
+        fd_t    fd;     /* file descriptor */
+        ...
+    } BLKFILE;
+
+When modifying the code in subsequent sections, the appropriate member
+of the union fd_t would be used to access a file descriptor.  If the file
+descriptor type for the new system is short, for instance, the file
+descriptor for BLKFILE *bp would be accessed as bp->fd.s.  It will be
+necessary to add a member to the fd_t union if one of the required type
+does not already exist.
+
+
+C3.  System Calls for File Access
+
+     The bulk of the operating system specific code is related to the
+system calls used to access the file system.  These system calls perform
+basic operations such as opening, reading, and writing a file, and are
+conceptually the same on most systems.  In fact, they can usually be
+directly translated to a corresponding call on the new system.
+
+     All system calls accessing the file system are isolated in the file
+buops.c (blkio unbuffered operations).  The OPSYS and CCOM macros are
+used to separate sections of code for different operating systems and
+compilers, respectively.
+
+    #if OPSYS == OS_DOS
+        /* code for DOS */
+    #if CCOM == CC_BC
+        /* code for Borland C */
+        .
+        .
+    #elif CCOM == CC_MSC
+        /* code for Microsoft C */
+        .
+        .
+    #endif
+    #elif OPSYS == OS_UNIX
+        /* code for UNIX */
+        .
+        .
+    #endif
+
+When porting to a new operating system or compiler, each of these
+conditional compilations must be located and an additional #elif for the
+new OS or CC macro added.
+
+
+C4.  System Calls for File Locking
+
+     System calls are also used to perform file locking.  All system
+calls for file locking are located in the file lockb.c.  This file must
+be modified in the same manner as buops.c.  If file locking will not be
+used on the new system, lockb.c need not be altered.
+
+
+C5.  Debugging
+
+     Each library's private header file (blkio_.h, btree_.h, etc.)
+contains a macro DEBUG whose definition has been commented out. 
+Reinstating this macro will enable the debugging code within the library,
+which includes such things as checking arguments passed to internal
+functions for validity.  With debugging enabled, a diagnostic trace will
+be generated for any abnormal error that occurs.  How this trace is
+reported is controlled by the "error print" macro in the same header as
+the DEBUG definition.  The error print macros are BEPRINT for blkio,
+BTEPRINT for btree, etc.  As distributed, these macros use fprintf to
+write the filename, line number, and value of errno to stderr.  For a
+windowing system it will be necessary to modify these to log the trace
+to a file.
+
+
+
+
+                                                             References
+
+
+AHO88	Aho, A., Kernighan B., and Weinberger P. The AWK
+	Programming Language. Reading, MA: Addison-Wesley, 1988.
+
+CALI82Calingaert, P. Operating System Elements. Englewood
+	Cliffs, NJ: Prentice Hall, 1982.
+
+COME79Comer, D. The Ubiquitous B-tree. ACM Computing
+	Surveys, June 1979.
+
+FROS89Frost, L. A Buffered I/O Library for Structured Files.
+	The C Users Journal, October 1989.
+
+HORO76Horowitz, E. and S. Sahni. Fundamentals of Data
+	Structures. Rockville, MD: Computer Science Press, 1976.
+
+KERN88Kernighan, B. and D. Ritchie. The C Programming
+	Language. Englewood Cliffs, NJ: Prentice Hall, 1988.
+
+KNUT68Knuth D. The Art of Computer Programming Volume 3 /
+	Sorting and Searching. Reading, MA: Addison-Wesley, 1968.
+
+ULLM82Ullman, J. Principles of Database Systems. Rockville,
+	 MD: Computer Science Press, 1982.

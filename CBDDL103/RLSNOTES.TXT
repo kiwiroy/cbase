@@ -1,0 +1,53 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+In this file are summarized the additions and modifications made to
+cbddlp this release.  Users upgrading from a previous release should
+read it carefully.
+
+
+                      cbddlp 1.0.3 Release Notes
+                      --------------------------
+
+o C preprocessor statements allowed in ddl files.
+
+o Expressions allowed in specifying the number of elements in arrays.
+
+o const removed from field defintion lists in generated code.
+
+o Limits on fields and records removed.  Most data areas are now
+  dynamically allocated.
+
+o Lexical analyzer now generated with lex.
+
+
+                      cbddlp 1.0.2 Release Notes
+                      --------------------------
+
+o t_cistring data type added.
+
+o Mechanism implemented to allow user-defined data types in ddl files
+  without modifying cbddlp source code.
+
+o Macros can be used to specify number of elements is array data
+  types.
+
+                      cbddlp 1.0.1 Release Notes
+                      --------------------------
+
+o Tab bug fixed.  Tabs previously discarded rather than converted to
+  spaces.
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+

@@ -1,0 +1,105 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+cbddlp is distributed in a single compressed file cbddlRL.zip; R and L
+would be the release and level numbers, respectively.  The ZIP data
+compression utilities are needed to extract the individual files.
+
+The following files are obtained by decompressing cbddlRL.zip:
+
+  cbddlp.rme  preliminary information
+rlsnotes.txt  release notes
+makefile      UNIX makefile
+  cbddlp.h    cbddlp header file
+ cbddlpl.l    cbddlp lex source
+  cbddlp.y    cbddlp yacc source
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+----------------------------------------------------------------------
+| cbddlp - cbase data definition language processor                  |
+| Version 1.0.3                                                      |
+----------------------------------------------------------------------
+
+======================================================================
+COPYRIGHT
+
+Copyright (c) 1989 Citadel
+All Rights Reserved
+
+Citadel
+241 East Eleventh Street
+Brookville, IN 47012
+317-647-4720
+BBS 317-647-2403
+
+The source code for cbddlp is provided only to registered cbase users.
+cbddlp may, however, be distributed in any binary executable format as
+part of an evaluation copy of cbase.
+
+======================================================================
+INSTALLATION INSTRUCTIONS
+
+The supplied makefile is for UNIX System V, and may require
+modification for use with other operating systems and other make
+utilities.
+
+                                 UNIX
+     1. Install cbase.
+     2. Copy the following files from the rolodeck example program to
+        the directory containing cbddlp: basstr.h, cvtss.c
+     3. In cbddlp.h, set PATHDLM to the path delimiter character for
+        the operating system being used (e.g., '/' for UNIX or '\\'
+        for DOS).
+     4. In makefile, set BINDIR to the directory where cbddlp should
+        be installed (e.g., /usr/bin for UNIX).
+     5. Compile cbddlp.
+             $ make cbddlp
+     6. Install cbddlp.  Depending on the permission settings for
+        BINDIR, this will probably require superuser status.
+             $ make install
+     7. Extract and print the reference manual.
+             $ make man
+             $ lp cbddlp.man
+
+cbddlp can be made to recognize user-defined database data types as
+predefined types by simply adding an entry to typtbl in cbddlp.y.
+
+
+
+                                                     Citadel  91/09/23
+

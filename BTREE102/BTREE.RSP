@@ -1,0 +1,8 @@
++btclose.obj  +btcreate.obj +btdelcur.obj +btdelete.obj &
++btfirst.obj  +btfix.obj    +btgetcur.obj +btgetk.obj   &
++btgetlck.obj +btinsert.obj +btkeycmp.obj +btlast.obj   &
++btlock.obj   +btnext.obj   +btopen.obj   +btprev.obj   &
++btsearch.obj +btsetbuf.obj +btsetcur.obj +btsetvbu.obj &
++btsync.obj                                             &
++btops.obj    +dgops.obj    +kyops.obj    +ndops.obj
+

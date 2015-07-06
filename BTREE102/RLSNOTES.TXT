@@ -1,0 +1,105 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+In this file are summarized the additions and modifications made to
+btree this release.  Users upgrading from a previous release should
+read it completely.
+
+
+                      btree 1.0.2 Release Notes
+                      -------------------------
+o <ansi.h> used for ANSI compatibility.
+
+o Function prototype form used for function definitions if AC_PROTO
+  defined.
+
+o Fields can now be in any order and can overlap.
+
+o Undefined bt_fltocr macro in btfix replaced with code.
+
+o Modified flag check removed from btopen.
+
+o btlock and btopen fixed to work on systems with mandatory file
+  locking.
+
+o DOS library names changed to more customary form where memory model
+  is first character rather than last.
+
+
+                      btree 1.0.1 Release Notes
+                      -------------------------
+o AC_* macros (see blkio release notes) used in place of __STDC__ to
+  detect ANSI compatibility.
+
+o ~NULL replaced with (char *)NULL + 1 in btcursor macro because some
+  compilers would not accept the ~ operator on NULL.
+
+o btlock bug fixed.
+
+
+                       btree 1.0 Release Notes
+                       -----------------------
+o The btree library has been enhanced to recognize fields. This has
+  required changes in the btcreate and btopen parameter lists.  The
+  original functions were
+
+
+
+
+                                                     Citadel  91/09/23
+     int btcreate(char *filename, size_t m, size_t keysize);
+     int btopen(char *filename, char *type,
+                int (*cmp)(const void *p1, const void *p2, size_t n));
+  The new functions are
+
+     int btcreate(char *filename, size_t m, size_t keysize,
+                                int fldc, btfield_t btfldv[]);
+     int btopen(char *filename, char *type,
+                                int fldc, btfield_t btfldv[]);
+
+o btdelete and btdelcur set the cursor to null.
+
+o btlock sets the cursor to null when unlocking.
+
+o errno macro BTEDUPKEY shortened to BTEDUP
+
+o The btree node links are of type bpos_t, and so changing bpos_t also
+  changed these links.  See the blkio release notes for explanation of
+  the effects of this change.
+
+o btkeycmp added to compare btree keys.
+
+o The btfix function has been added to fix corrupt btree files.  This has
+  required a slight change in the btree file format.
+
+o function prototypes used if __STDC__ == 1
+
+o const used if __STDC__ == 1
+
+o -A compiler option used in Turbo C installation batch file to set
+  __STDC__ to 1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                     Citadel  91/09/23
+

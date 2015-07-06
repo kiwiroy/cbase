@@ -1,0 +1,8 @@
++lsclose.obj  +lscreate.obj +lsdelcur.obj +lsfirst.obj  &
++lsgetcur.obj +lsgetlck.obj +lsgetr.obj   +lsgetrf.obj  &
++lsinsert.obj +lslast.obj   +lslock.obj   +lsnext.obj   &
++lsopen.obj   +lsprev.obj   +lsputr.obj   +lsputrf.obj  &
++lssearch.obj +lssetbuf.obj +lssetcur.obj +lssetvbu.obj &
++lssync.obj                                             &
++lsops.obj    +rcops.obj
+

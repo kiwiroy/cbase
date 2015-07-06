@@ -1,0 +1,53 @@
+----------------------------------------------------------------------
+| Citadel                                                            |
+| 241 East Eleventh Street * Brookville, IN 47012 * 317-647-4720     |
+|                                               BBS 317-647-2403     |
+----------------------------------------------------------------------
+
+In this file are summarized the additions and modifications made to
+cbase this release.  Users upgrading from a previous release should
+read it carefully.
+
+
+                       lseq 1.0.2 Release Notes
+                       ------------------------
+o <ansi.h> used for ANSI compatibility.
+
+o Function prototype form used for function definitions if AC_PROTO
+  defined.
+
+o Modified flag check removed from lsopen.
+
+o lslock and lsopen fixed to work on systems with mandatory file
+  locking.
+
+o DOS library names changed to more customary form where memory model
+  is first character rather than last.
+
+
+                       lseq 1.0.1 Release Notes
+                       ------------------------
+o AC_* macros (see blkio release notes) used in place of __STDC__ to
+  detect ANSI compatibility.
+
+o ~NULL replaced with (char *)NULL + 1 in btcursor macro because some
+  compilers would not accept the ~ operator on NULL.
+
+o lssearch bug fixed - calls to lsrecnext changed to lsnext.
+
+
+                        lseq 1.0 Release Notes
+                        ----------------------
+o lsinsert function dropped.  lsinscur renamed lsinsert.
+
+o lspos_t is typedefed as bpos_t, and so changing bpos_t also changed
+  lspos_t.  See blkio release notes for explanation of the effects of
+  this change.
+
+o lslock sets the cursor to null when unlocking.
+
+o -A compiler option used in Turbo C installation batch file to set
+  __STDC__ to 1.
+
+                                                     Citadel  91/09/23
+
